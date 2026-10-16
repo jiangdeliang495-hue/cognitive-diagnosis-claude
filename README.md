@@ -113,5 +113,5 @@ tests/  test_dina.py test_schema.py test_seed.py test_api.py test_cli.py browser
 docs/   设计/契约/算法/开发说明/证据/验证
 ```
 
-> GitHub 私有仓库：[https://github.com/jiangdeliang495-hue/cognitive-diagnosis-claude](https://github.com/jiangdeliang495-hue/cognitive-diagnosis-claude)
-> （私有仓库，评审需要仓库访问权限）。提交邮件**尚未发送**。
+> GitHub 公开仓库：[https://github.com/jiangdeliang495-hue/cognitive-diagnosis-claude](https://github.com/jiangdeliang495-hue/cognitive-diagnosis-claude)。
+> 提交邮件**尚未发送**。

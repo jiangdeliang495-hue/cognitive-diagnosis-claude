@@ -282,6 +282,16 @@
 
 说明：用户已授权上传 GitHub；Codex 已实际创建私有仓库 `https://github.com/jiangdeliang495-hue/cognitive-diagnosis-claude` 并配置 origin，**实际推送与远程验证由 Codex 执行**。本会话只更新发布元数据（README 仓库链接与私有说明、SUBMISSION_DRAFT 状态、本日志），不编造推送完成状态、未邀请评审、未发送邮件；历史「暂缓同步」记录保留在原文中。
 
+### 提示词 23（用户纠正为公开仓库，同步发布元数据，全文）
+
+> 用户明确纠正：“公开啊我要提交啊”。Codex 已将最终仓库 https://github.com/jiangdeliang495-hue/cognitive-diagnosis-claude 改为公开。继续保持 Max，仅更新当前项目的发布元数据：
+> 1. README.md 末尾改为“GitHub 公开仓库”的真实 Markdown 链接，移除“私有仓库，评审需要访问权限”等过时说明，保留邮件未发送。
+> 2. docs/SUBMISSION_DRAFT.md 改为公开仓库、可直接访问，去掉评审需私有访问权限的说明；姓名仍待填写，邮件仍未发送。
+> 3. docs/PROMPT_LOG.md 保留提示词22及所有历史原文中当时私有状态，追加本次真实提示词23和说明：用户要求公开以提交，Codex修改可见性，当前元数据同步公开状态。不要改业务代码/测试/PDF，不操作Git/GitHub，不读凭据，不编造邮件发送。
+> 完成后列出改动文件。
+
+说明：用户纠正要求仓库**公开**以便提交；Codex 已将仓库可见性改为公开。本会话仅把发布元数据（README、SUBMISSION_DRAFT、本日志）同步为公开状态；提示词 22 及其它历史原文中「私有」表述按当时事实保留；未改业务代码/测试/PDF，未操作 Git/GitHub，未读凭据，未编造邮件发送。
+
 ### 环境核验（阶段 0，真实命令结果）
 
 - `pwd` → `/private/tmp/claude-homework-t2WpwB`（与要求一致）
