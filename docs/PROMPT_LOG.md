@@ -80,6 +80,21 @@
 
 说明：防止「始终返回初始 g/s、history 平坦、converged=False」的伪实现通过 fit 测试；新增一步 EM 手算 fixture 与「后验边际须与最终题参重算逐项一致」两处硬断言。
 
+### 提示词 6（实现 src/dina.py 使测试通过，全文）
+
+> 真实RED测试提交已完成：d03855c test: specify DINA posterior and EM behavior in red（由外部编排提交）。请记录。
+> 算法测试已完成真实RED并获批准，现在实现 src/dina.py 使现有测试通过。请真实应用 Superpowers TDD 工作流，先阅读现有测试和数值契约，按RED→GREEN→必要重构执行，不重新做需求分析。
+> 仅实现纯算法：画像枚举bit0=KP1、Q多技能AND、固定均匀先验1/2^K、对数域归一化及边际、约束EM题参校准、验证输入、确定性。保持题参[.02,.35]，零有效分母保留旧值，负似然异常不判收敛，max_iter耗尽返回False，最终题参/后验/似然一致。不得为了通过测试删除/减弱手算断言或其他有效测试；若发现测试本身有数学错误先简短说明，不悄悄改。
+> 真实运行全部算法unittest并保存命令/退出码/原始输出至docs/validation/algorithm-green.txt。补充必要算法接口说明、记录本条真实Prompt及1-2句意图，创建.gitignore排除.claude、缓存、生成DB、运行日志、系统文件。不要读凭据，不推远程，不尝试.git写入；完成后由外部编排创建真实feat提交。不要开始数据库/HTTP/前端。本阶段完成后报告测试总数和结果，等待后端阶段指令。
+
+说明：批准进入 GREEN，实现纯算法使 22 个测试通过；限定只做算法、不改弱测试、不写 .git，并补齐 .gitignore 与接口说明。
+
+### 提示词 7（fit 收敛异常须抛 ArithmeticError，全文）
+
+> 22项测试已通过，核心公式独立复核通过。仅修复一个冻结契约缺口：src/dina.py的fit在delta < -1e-9时目前仍继续迭代，必须先抛ArithmeticError（说明EM似然显著下降），再判收敛，不能静默继续或伪称收敛。请加这一最小判断，不重构其它内容；复跑22项并更新algorithm-green.txt，记录本条真实Prompt。补记已存在的补强RED提交 b72928f。不要写.git，完成简短报告后等待后端阶段指令。
+
+说明：冻结契约要求「显著负对数似然增量」先报错而非静默继续；本修复在 fit 内对 delta < -1e-9 抛 ArithmeticError，再判收敛。
+
 ### 环境核验（阶段 0，真实命令结果）
 
 - `pwd` → `/private/tmp/claude-homework-t2WpwB`（与要求一致）
@@ -115,7 +130,15 @@
 > - 本会话不写 `.git`；test 提交由外部编排创建。
 > - 补强（提示词 5）：新增两步 EM 手算断言与后验边际一致性断言；`python3 -m unittest discover -s tests -v`
 >   → `Ran 22 tests ... FAILED (errors=22)`，`EXIT_CODE=1`；原始输出存 `docs/validation/algorithm-red-strengthened.txt`（保留原 algorithm-red.txt）。
+> - 外部编排已完成真实 test 提交：`d03855c test: specify DINA posterior and EM behavior in red`。
+> - 外部编排已完成补强 RED 提交：`b72928f`（新增两步 EM 手算与后验边际一致性断言）。
 
-## 阶段 3：feat（GREEN）—— 未开始
+## 阶段 3：feat（GREEN）—— 纯算法已实现，22/22 通过
+
+> 真实命令与结果：
+> - `python3 -m unittest discover -s tests -v` → `Ran 22 tests ... OK`，`EXIT_CODE=0`。
+> - 原始命令、退出码与输出已存 `docs/validation/algorithm-green.txt`。
+> - 实现 `src/dina.py`（纯算法，零依赖）；本会话不写 `.git`；feat 提交由外部编排创建。
+> - 尚未开始数据库/HTTP/前端。
 
 ## 阶段 4：E2E —— 未开始
