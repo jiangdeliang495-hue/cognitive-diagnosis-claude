@@ -60,6 +60,17 @@
 
 说明：确认 git init 已由外部编排完成（本会话不再写 .git）；给出三处精确措辞修正并限定只改设计文档。
 
+### 提示词 4（进入算法 TDD 测试阶段，全文）
+
+> 真实设计提交已由外部编排完成：65d020e docs: define cognitive diagnosis requirements schema and contracts。请记录这一真实状态。
+> 设计已获批准，进入算法 TDD 测试阶段；当前只写测试，不实现算法。先确认上一轮三处数学措辞已保存。请保持简洁，按阶段交付，不必复述需求或做长篇方案思考。
+> 请真实调用 Superpowers 的 TDD 工作流，按已冻结的契约为 src/dina.py 设计有价值的 unittest 测试。必要时可用测试确定纯后验推断函数及fit函数的接口并补充接口说明，但不能先实现逻辑再反推测试。仅允许最小空包/接口桩，不允许先写DINA实现。
+> 至少覆盖：K=1、guess=.2/slip=.1、均匀先验下，单题答对掌握后验9/11、答错1/9；多技能AND条件；知识边际概率而非MAP画像；画像位序与Q列对齐；后验归一化；长题列对数稳定性；非法Q/X及形状；不修改输入；EM似然在浮点容差内不下降；最终返回题参、历史末项和重算似然一致；约束边界；固定先验；max_iter耗尽不冒充收敛；确定性与适当的行/列置换不变性。测试不要求12名演示学生能精确恢复真实题参，也不要断言所有后验都极端接近0/1。
+> 实际运行测试得到RED，并将原始命令、退出码和输出保存到docs/validation/algorithm-red.txt。RED应来自待实现接口/行为，而不是语法错误或缺少第三方依赖。记录这条真实Prompt及1-2句意图说明。由于Claude沙箱限制.git写入，完成测试后由外部编排创建真实test提交，你不要重复诊断或尝试绕过限制。不要修改数学断言来让未来实现更容易，不推远程。
+> 完成后只报告测试范围、真实失败原因和commit ID，等待我的算法实现指令。
+
+说明：批准设计、进入算法 TDD；要求真实调用 TDD 工作流、按冻结契约写测试并跑出 RED，RED 须来自未实现行为；.git 写入仍由外部编排。
+
 ### 环境核验（阶段 0，真实命令结果）
 
 - `pwd` → `/private/tmp/claude-homework-t2WpwB`（与要求一致）
@@ -84,8 +95,15 @@
 >   因此本会话无法在项目内创建 git 仓库/提交；**未产生任何伪造的 commit ID**。
 > - 随后由外部编排在同一项目成功执行 `git init`（本会话不再尝试 .git 写入）；后续 add/commit
 >   由外部编排/用户执行，文档与代码仍全部由本会话生成。
+> - 外部编排已完成真实设计提交：`65d020e docs: define cognitive diagnosis requirements schema and contracts`。
 
-## 阶段 2：tests（RED）—— 未开始
+## 阶段 2：tests（RED）—— RED 已复现
+
+> 真实命令与结果：
+> - `python3 -m unittest discover -s tests -v` → `Ran 20 tests ... FAILED (errors=20)`，`EXIT_CODE=1`。
+> - 20 个测试全部因 `src/dina.py` 接口桩抛 `NotImplementedError` 而 RED（来自待实现行为，非语法/导入错误）。
+> - 原始命令、退出码与输出已存 `docs/validation/algorithm-red.txt`。
+> - 本会话不写 `.git`；test 提交由外部编排创建。
 
 ## 阶段 3：feat（GREEN）—— 未开始
 

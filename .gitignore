@@ -1,0 +1,12 @@
+# 运行时产物（由 seed 脚本确定性重建，不入库）
+data/
+*.db
+*.db-journal
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# 系统
+.DS_Store
