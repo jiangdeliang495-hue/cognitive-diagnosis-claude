@@ -1,0 +1,275 @@
+COMMAND: python3 -m unittest discover -s tests -v
+test_determinism_fit (test_dina.FitTests.test_determinism_fit) ... ERROR
+test_final_params_history_and_relik_consistent (test_dina.FitTests.test_final_params_history_and_relik_consistent) ... ERROR
+test_fit_posterior_marginal_matches_recomputed (test_dina.FitTests.test_fit_posterior_marginal_matches_recomputed) ... ERROR
+test_fixed_prior_only_uniform (test_dina.FitTests.test_fixed_prior_only_uniform) ... ERROR
+test_item_permutation_invariance_fit (test_dina.FitTests.test_item_permutation_invariance_fit) ... ERROR
+test_likelihood_non_decreasing (test_dina.FitTests.test_likelihood_non_decreasing) ... ERROR
+test_max_iter_exhaustion_not_converged (test_dina.FitTests.test_max_iter_exhaustion_not_converged) ... ERROR
+test_one_step_em_hand_calc (test_dina.FitTests.test_one_step_em_hand_calc) ... ERROR
+test_param_bounds (test_dina.FitTests.test_param_bounds) ... ERROR
+test_skill_permutation_invariance_fit (test_dina.FitTests.test_skill_permutation_invariance_fit) ... ERROR
+test_and_gate_multi_skill (test_dina.PosteriorProfileTests.test_and_gate_multi_skill) ... ERROR
+test_determinism_pure (test_dina.PosteriorProfileTests.test_determinism_pure) ... ERROR
+test_does_not_modify_inputs (test_dina.PosteriorProfileTests.test_does_not_modify_inputs) ... ERROR
+test_fixed_prior_default_uniform_and_respected (test_dina.PosteriorProfileTests.test_fixed_prior_default_uniform_and_respected) ... ERROR
+test_item_permutation_invariance_pure (test_dina.PosteriorProfileTests.test_item_permutation_invariance_pure) ... ERROR
+test_k1_single_item_hand_calc (test_dina.PosteriorProfileTests.test_k1_single_item_hand_calc) ... ERROR
+test_long_column_log_stability (test_dina.PosteriorProfileTests.test_long_column_log_stability) ... ERROR
+test_marginal_is_probability_not_map_profile (test_dina.PosteriorProfileTests.test_marginal_is_probability_not_map_profile) ... ERROR
+test_posterior_normalization (test_dina.PosteriorProfileTests.test_posterior_normalization) ... ERROR
+test_profile_bit_order_matches_q_columns (test_dina.PosteriorProfileTests.test_profile_bit_order_matches_q_columns) ... ERROR
+test_rejects_illegal_q_x_and_shapes (test_dina.PosteriorProfileTests.test_rejects_illegal_q_x_and_shapes) ... ERROR
+test_skill_permutation_invariance_pure (test_dina.PosteriorProfileTests.test_skill_permutation_invariance_pure) ... ERROR
+
+======================================================================
+ERROR: test_determinism_fit (test_dina.FitTests.test_determinism_fit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 222, in test_determinism_fit
+    a = self._fit()
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 173, in _fit
+    return fit(self.Q, self.X, **kw)
+  File "/private/tmp/claude-homework-t2WpwB/src/dina.py", line 59, in fit
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_final_params_history_and_relik_consistent (test_dina.FitTests.test_final_params_history_and_relik_consistent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 212, in test_final_params_history_and_relik_consistent
+    res = self._fit()
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 173, in _fit
+    return fit(self.Q, self.X, **kw)
+  File "/private/tmp/claude-homework-t2WpwB/src/dina.py", line 59, in fit
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_fit_posterior_marginal_matches_recomputed (test_dina.FitTests.test_fit_posterior_marginal_matches_recomputed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 200, in test_fit_posterior_marginal_matches_recomputed
+    res = self._fit()
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 173, in _fit
+    return fit(self.Q, self.X, **kw)
+  File "/private/tmp/claude-homework-t2WpwB/src/dina.py", line 59, in fit
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_fixed_prior_only_uniform (test_dina.FitTests.test_fixed_prior_only_uniform)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 232, in test_fixed_prior_only_uniform
+    fit(self.Q, self.X, prior="estimated")
+    ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/dina.py", line 59, in fit
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_item_permutation_invariance_fit (test_dina.FitTests.test_item_permutation_invariance_fit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 244, in test_item_permutation_invariance_fit
+    a = self._fit()
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 173, in _fit
+    return fit(self.Q, self.X, **kw)
+  File "/private/tmp/claude-homework-t2WpwB/src/dina.py", line 59, in fit
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_likelihood_non_decreasing (test_dina.FitTests.test_likelihood_non_decreasing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 176, in test_likelihood_non_decreasing
+    res = self._fit()
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 173, in _fit
+    return fit(self.Q, self.X, **kw)
+  File "/private/tmp/claude-homework-t2WpwB/src/dina.py", line 59, in fit
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_max_iter_exhaustion_not_converged (test_dina.FitTests.test_max_iter_exhaustion_not_converged)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 217, in test_max_iter_exhaustion_not_converged
+    res = self._fit(max_iter=1)
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 173, in _fit
+    return fit(self.Q, self.X, **kw)
+  File "/private/tmp/claude-homework-t2WpwB/src/dina.py", line 59, in fit
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_one_step_em_hand_calc (test_dina.FitTests.test_one_step_em_hand_calc)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 191, in test_one_step_em_hand_calc
+    res = fit(q, x, max_iter=1)
+  File "/private/tmp/claude-homework-t2WpwB/src/dina.py", line 59, in fit
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_param_bounds (test_dina.FitTests.test_param_bounds)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 205, in test_param_bounds
+    res = self._fit()
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 173, in _fit
+    return fit(self.Q, self.X, **kw)
+  File "/private/tmp/claude-homework-t2WpwB/src/dina.py", line 59, in fit
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_skill_permutation_invariance_fit (test_dina.FitTests.test_skill_permutation_invariance_fit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 251, in test_skill_permutation_invariance_fit
+    a = self._fit()
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 173, in _fit
+    return fit(self.Q, self.X, **kw)
+  File "/private/tmp/claude-homework-t2WpwB/src/dina.py", line 59, in fit
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_and_gate_multi_skill (test_dina.PosteriorProfileTests.test_and_gate_multi_skill)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 45, in test_and_gate_multi_skill
+    marg, _ = posterior_marginal([[1, 1]], [[1]], [0.2], [0.1])
+              ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/dina.py", line 45, in posterior_marginal
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_determinism_pure (test_dina.PosteriorProfileTests.test_determinism_pure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 134, in test_determinism_pure
+    a = posterior_marginal(q, x, [0.2, 0.2, 0.2], [0.1, 0.1, 0.1])
+  File "/private/tmp/claude-homework-t2WpwB/src/dina.py", line 45, in posterior_marginal
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_does_not_modify_inputs (test_dina.PosteriorProfileTests.test_does_not_modify_inputs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 127, in test_does_not_modify_inputs
+    posterior_marginal(q, x, [0.2, 0.2, 0.2], [0.1, 0.1, 0.1])
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/dina.py", line 45, in posterior_marginal
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_fixed_prior_default_uniform_and_respected (test_dina.PosteriorProfileTests.test_fixed_prior_default_uniform_and_respected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 100, in test_fixed_prior_default_uniform_and_respected
+    marg, _ = posterior_marginal([[1, 0]], [[1]], [0.2], [0.1])
+              ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/dina.py", line 45, in posterior_marginal
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_item_permutation_invariance_pure (test_dina.PosteriorProfileTests.test_item_permutation_invariance_pure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 148, in test_item_permutation_invariance_pure
+    a = posterior_marginal(q, x, g, s)
+  File "/private/tmp/claude-homework-t2WpwB/src/dina.py", line 45, in posterior_marginal
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_k1_single_item_hand_calc (test_dina.PosteriorProfileTests.test_k1_single_item_hand_calc)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 32, in test_k1_single_item_hand_calc
+    marg_c, ll_c = posterior_marginal([[1]], [[1]], [0.2], [0.1])
+                   ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/dina.py", line 45, in posterior_marginal
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_long_column_log_stability (test_dina.PosteriorProfileTests.test_long_column_log_stability)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 93, in test_long_column_log_stability
+    marg, ll = posterior_marginal(q, x, [g] * n, [s] * n)
+               ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/dina.py", line 45, in posterior_marginal
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_marginal_is_probability_not_map_profile (test_dina.PosteriorProfileTests.test_marginal_is_probability_not_map_profile)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 57, in test_marginal_is_probability_not_map_profile
+    marg, _ = posterior_marginal([[1, 1]], [[1]], [0.2], [0.1])
+              ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/dina.py", line 45, in posterior_marginal
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_posterior_normalization (test_dina.PosteriorProfileTests.test_posterior_normalization)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 75, in test_posterior_normalization
+    post, _ = posterior_profile(q, x, [0.2] * len(q), [0.1] * len(q))
+              ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/dina.py", line 35, in posterior_profile
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_profile_bit_order_matches_q_columns (test_dina.PosteriorProfileTests.test_profile_bit_order_matches_q_columns)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 65, in test_profile_bit_order_matches_q_columns
+    marg0, _ = posterior_marginal([[1, 0]], [[1]], [0.2], [0.1])
+               ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/dina.py", line 45, in posterior_marginal
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_rejects_illegal_q_x_and_shapes (test_dina.PosteriorProfileTests.test_rejects_illegal_q_x_and_shapes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 121, in test_rejects_illegal_q_x_and_shapes
+    func(*args)
+    ~~~~^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/dina.py", line 45, in posterior_marginal
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_skill_permutation_invariance_pure (test_dina.PosteriorProfileTests.test_skill_permutation_invariance_pure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_dina.py", line 159, in test_skill_permutation_invariance_pure
+    a = posterior_marginal(q, x, g, s)
+  File "/private/tmp/claude-homework-t2WpwB/src/dina.py", line 45, in posterior_marginal
+    raise NotImplementedError
+NotImplementedError
+
+----------------------------------------------------------------------
+Ran 22 tests in 0.013s
+
+FAILED (errors=22)
+EXIT_CODE=1

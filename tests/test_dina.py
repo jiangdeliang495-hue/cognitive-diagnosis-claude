@@ -179,6 +179,28 @@ class FitTests(unittest.TestCase):
         for a, b in zip(hist, hist[1:]):
             self.assertGreaterEqual(b - a, -1e-8)  # 无实质下降
 
+    def test_one_step_em_hand_calc(self):
+        # 独立手算的一步 EM fixture（不调用待实现 fit 作为期望值）：
+        # K=1, Q=[[1]], X=[[1],[1],[1],[0]], 初始 g=.2/s=.1。
+        # 三对一错：答对后验 9/11（3 人）、答错后验 1/9（1 人）。
+        # M 步：g=(3*2/11)/(3*2/11+8/9)=27/71 → 截断 .35；
+        #       s=(1/9)/(3*9/11+1/9)=11/254。
+        # 初始 LL=3*log(.55)+log(.45)，一步后 LL 应严格提高。
+        q = [[1]]
+        x = [[1], [1], [1], [0]]
+        res = fit(q, x, max_iter=1)
+        self.assertAlmostEqual(res.guess[0], 0.35, places=12)
+        self.assertAlmostEqual(res.slip[0], 11 / 254, places=12)
+        self.assertAlmostEqual(res.loglik_history[0],
+                               3 * math.log(0.55) + math.log(0.45), places=12)
+        self.assertGreater(res.loglik_history[1], res.loglik_history[0])
+        self.assertFalse(res.converged)
+
+    def test_fit_posterior_marginal_matches_recomputed(self):
+        res = self._fit()
+        marg_re, _ = posterior_marginal(self.Q, self.X, res.guess, res.slip)
+        self.assertTrue(_allclose(res.posterior_marginal, marg_re, 1e-9))
+
     def test_param_bounds(self):
         res = self._fit()
         for g in res.guess:

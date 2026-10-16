@@ -71,6 +71,15 @@
 
 说明：批准设计、进入算法 TDD；要求真实调用 TDD 工作流、按冻结契约写测试并跑出 RED，RED 须来自未实现行为；.git 写入仍由外部编排。
 
+### 提示词 5（补强 RED：防伪实现的两组数学检查，全文）
+
+> 暂停上一条实现任务：接口仍是空桩。独立复核发现当前fit测试可被“始终返回初始g/s、history=[初始LL,初始LL]、converged=False”伪实现通过。先补强RED，只增加以下两组核心数学检查，不重做设计或其他测试：
+> 1. 一个独立手算的一步EM fixture，明确期望计数及区间截断后题参，并断言max_iter=1实际更新参数且LL严格提高。可以用K=1、Q=[[1]]、X=[[1],[1],[1],[0]]：初始g=.2 s=.1；三次答对时掌握后验9/11，一次答错1/9；M步g=(3*2/11)/(3*2/11+8/9)=27/71，截断为.35；s=(1/9)/(3*9/11+1/9)=11/254。手算请核对后固化断言，不调用待实现fit作为预期值。初始LL=3log(.55)+log(.45)，一步应严格提高。
+> 2. 返回FitResult.posterior_marginal必须与最终返回g/s重新调用posterior_marginal(Q,X,g,s)得到的概率逐项一致。
+> 实际运行全部测试得到RED，保留原algorithm-red.txt，另存docs/validation/algorithm-red-strengthened.txt（命令/退出码/原始输出），记录此真实纠偏Prompt。只补测试，不实现算法；等待补强测试提交后继续实现。不要写.git，回复简短。
+
+说明：防止「始终返回初始 g/s、history 平坦、converged=False」的伪实现通过 fit 测试；新增一步 EM 手算 fixture 与「后验边际须与最终题参重算逐项一致」两处硬断言。
+
 ### 环境核验（阶段 0，真实命令结果）
 
 - `pwd` → `/private/tmp/claude-homework-t2WpwB`（与要求一致）
@@ -104,6 +113,8 @@
 > - 20 个测试全部因 `src/dina.py` 接口桩抛 `NotImplementedError` 而 RED（来自待实现行为，非语法/导入错误）。
 > - 原始命令、退出码与输出已存 `docs/validation/algorithm-red.txt`。
 > - 本会话不写 `.git`；test 提交由外部编排创建。
+> - 补强（提示词 5）：新增两步 EM 手算断言与后验边际一致性断言；`python3 -m unittest discover -s tests -v`
+>   → `Ran 22 tests ... FAILED (errors=22)`，`EXIT_CODE=1`；原始输出存 `docs/validation/algorithm-red-strengthened.txt`（保留原 algorithm-red.txt）。
 
 ## 阶段 3：feat（GREEN）—— 未开始
 
