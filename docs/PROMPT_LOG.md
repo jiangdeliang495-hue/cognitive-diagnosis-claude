@@ -95,6 +95,22 @@
 
 说明：冻结契约要求「显著负对数似然增量」先报错而非静默继续；本修复在 fit 内对 delta < -1e-9 抛 ArithmeticError，再判收敛。
 
+### 提示词 8（进入后端 SQLite/seed/HTTP 的 TDD RED 阶段，全文）
+
+> 这是同一作业的后端阶段新Code会话。唯一项目目录 /private/tmp/claude-homework-t2WpwB，请先pwd核对，只读写此项目，不读取或复制相邻项目。模型路由为界面DeepSeek V4 Pro、兼容别名claude-opus-4-8、DeepSeek Gateway；子代理继承Pro，不指定sonnet/haiku。官方Superpowers 7已安装启用，请真实加载test-driven-development，不重做已批准的brainstorming设计。不要读取API Key、剪贴板、密钥链、环境变量，不推送远程/发邮件/付费。文档如实写Codex代用户操作Claude Desktop Code。已有真实本地历史：65d020e设计、d03855c及b72928f算法RED、38744d8算法GREEN（22项通过）。.git写入受Claude沙箱限制，提交由外部编排执行，你无需尝试。先读docs/ARCHITECTURE.md、API_CONTRACT.md、schema.sql及必要设计部分，在现有代码上继续；不要覆盖PROMPT_LOG已有内容，只追加实际收到的Prompt及意图。
+> 算法阶段已通过。现在进入SQLite/seed/HTTP的TDD RED阶段，只写契约澄清、测试和最小接口桩，不实现服务。继续Superpowers工作流，直接产出，不重复需求分析。所有文件仍只在 /private/tmp/claude-homework-t2WpwB；不读取相邻项目/凭据、不写.git、不推远程。
+> 先在API/架构文档补清这些常规边界：Content-Type JSON只用于API，HTML/CSS/JS各自MIME；非GET API返回405 METHOD_NOT_ALLOWED；未知数字学生ID返回404，非正整数ID返回400；diagnosis.matrix为按student_id/kp_id升序的60行长表；correct_rate逐知识点以Q=1题目为分母，综合题计入每个涉及KP；JSON保留有限浮点数，不必截成展示百分比；seed默认拒绝覆盖已有库，可通过显式--force重建（测试临时库）；缺DB服务启动失败，不隐式建库。src/seed.py、server.py既支持python3 -m src.seed/server，也支持README所述直接脚本启动。服务默认127.0.0.1，测试支持临时DB/端口0，运行零依赖。
+> 编写有价值的stdlib unittest：schema约束/FK/二元X/题参边界；确定性seed的5知识点24题12学生，Q=三份I5+9综合、画像理想反应32种互异、真值沿DAG但fit仅收Q/X；从SQLite按稳定ID读回Q/X与造数一致、diagnosis60条与用保存题参重算的边际一致；DAG无环；真实HTTP验证6个GET接口、数组排序/计数/概率范围、correct_rate重算、无profile_id、两名学生数据不同、GET前后DB hash不变、404/400/405、缺DB不建库。以临时文件fixture避免破坏任何已有库。静态资源MIME与路径穿越检查可在前端阶段加入，此轮不强迫不存在的页面变绿。
+> 测试先于实现，运行得到真实RED（来自未实现行为，不是语法/第三方依赖问题），保存命令/退出码/原始输出到docs/validation/backend-red.txt。记录本条真实Prompt及意图。不要减弱已通过的算法测试；不要提前生成实现。完成后简报测试范围与真实失败原因，等待后端实现指令；由外部编排提交test历史。
+
+说明：批准进入后端 SQLite/seed/HTTP 的 TDD 测试阶段；先补清 API/架构的常规边界（MIME/405/404/400/60 行长表/correct_rate 分母/浮点/seed 覆盖/缺库启动/双入口），再写 schema/seed/HTTP 测试与最小接口桩并跑出真实 RED；.git 写入仍由外部编排。
+
+### 提示词 9（思考强度控件异常中断后的续跑指令，全文）
+
+> 继续刚才因思考强度控件异常被中断的后端RED阶段；现在已恢复到已验证的Medium。你已经读完设计/代码并开始澄清架构文档，不需要重复读取或重新分析方案。按上一条任务直接完成：补清API边界，创建db/data_gen/seed/server最小空桩及有价值的SQLite/seed/真实HTTP unittest；不实现逻辑；运行得到真实RED，保存命令、退出码、完整输出于docs/validation/backend-red.txt；追加真实Prompt和说明。保持已有22项算法测试，不写.git。用中文简短报告，等待后端实现指令。
+
+说明：思考强度控件异常中断后的续跑指令——确认已恢复 Medium、无需重读方案，直接完成后端 RED 阶段并如实记录。
+
 ### 环境核验（阶段 0，真实命令结果）
 
 - `pwd` → `/private/tmp/claude-homework-t2WpwB`（与要求一致）
@@ -141,4 +157,13 @@
 > - 实现 `src/dina.py`（纯算法，零依赖）；本会话不写 `.git`；feat 提交由外部编排创建。
 > - 尚未开始数据库/HTTP/前端。
 
-## 阶段 4：E2E —— 未开始
+## 阶段 4：后端 tests（RED）—— SQLite / seed / HTTP
+
+> 真实命令与结果：
+> - `python3 -m unittest discover -s tests -v` → `Ran 48 tests ... FAILED (errors=26)`，`EXIT_CODE=1`。
+> - 22 项算法测试保持通过；26 个错误全部来自 db/data_gen/seed/server 接口桩的
+>   `NotImplementedError`（待实现行为，非语法/导入错误）。原始命令、退出码与输出已存
+>   `docs/validation/backend-red.txt`。
+> - 本会话不写 `.git`；test 提交由外部编排创建。
+
+## 阶段 5：E2E —— 未开始
