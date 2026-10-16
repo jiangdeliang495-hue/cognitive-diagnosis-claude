@@ -1,0 +1,27 @@
+External orchestration verification; frontend implementation not started
+Command: E2E_BASE_URL=http://127.0.0.1:8765 node tests/browser_e2e.cjs --http-only
+被测服务：http://127.0.0.1:8765
+
+── HTTP 静态 MIME / 编码 / 路径穿越 ──
+  ✘ 静态 / → text/html; charset=utf-8 且 UTF-8 含中文
+      GET / → 404
+  ✘ 静态 /index.html /style.css /app.js 各返回正确 MIME+charset
+      GET /index.html → 404
+  ✘ 静态 /app.js 内容为 UTF-8 编码（含中文注释/字符串字节可解码）
+      GET /app.js → 404
+  ✔ 路径穿越（裸 / 编码 / 反斜杠）一律 404 且不泄漏源码或库内容
+  ✔ 未知静态路径 → 404 JSON（白名单路由，不落到文件系统）
+  ✔ /api/* 保持 application/json（静态 MIME 不误用于 API）
+
+──────────────────────────────
+结果：3 通过 / 3 失败（共 6 项）
+失败项：
+  - 静态 / → text/html; charset=utf-8 且 UTF-8 含中文
+    GET / → 404
+  - 静态 /index.html /style.css /app.js 各返回正确 MIME+charset
+    GET /index.html → 404
+  - 静态 /app.js 内容为 UTF-8 编码（含中文注释/字符串字节可解码）
+    GET /app.js → 404
+EXIT_CODE=1
+
+PROCESS_EXIT_CODE=1

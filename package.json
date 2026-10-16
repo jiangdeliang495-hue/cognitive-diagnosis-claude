@@ -1,0 +1,13 @@
+{
+  "name": "cognitive-diagnosis-mvp-qa",
+  "private": true,
+  "version": "0.0.0",
+  "description": "前端 E2E / HTTP 静态契约测试。仅 QA 开发依赖（playwright）；应用运行仍零依赖，不引入任何运行时第三方库。",
+  "scripts": {
+    "test:e2e": "node tests/browser_e2e.cjs",
+    "test:e2e:http": "node tests/browser_e2e.cjs --http-only"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
+}

@@ -139,6 +139,31 @@
 
 说明：告知外部编排已在沙箱外原样跑出 66 项 OK（非改沙箱设置），并要求按 TDD 修复两组契约缺口——① server.main 缺 DEFAULT_DB_PATH、直接脚本 `from src` 导入失败，改用 argparse 并补 subprocess 验证；② HTTP 请求边界缺异常处理/500 JSON、超大 ID 触发 sqlite OverflowError、非有限 JSON、HTTP/1.1 协议版本，补最小边界回归测试。
 
+### 提示词 13（进入前端/E2E 测试先行阶段，全文）
+
+> 这是同一作业的前端/E2E新会话。唯一目录/private/tmp/claude-homework-t2WpwB，先pwd核对，仅操作此项目，不读取相邻旧代码、API Key/剪贴板/密钥链，不打印环境变量，不推远程/邮件/付费。界面DeepSeek V4 Pro、兼容别名claude-opus-4-8经DeepSeek Gateway；子代理继承Pro。请真实加载已启用Superpowers test-driven-development，不重做已批准设计；所有应用实现和测试继续由Claude Code生成，Codex代操作/本地Git/外部QA，PROMPT_LOG只追加实际提示词。已有后端提交5035f7f，外部完整测试78项OK，证据docs/validation/backend-external-green.txt。先读必要的PRD/API契约与server静态路由，按需调用已有API。
+> Python算法/后端已GREEN，现在进入浏览器E2E的测试先行阶段。只创建测试和前端验收说明，不写页面实现，不扩大业务范围。继续真实Superpowers TDD工作流。
+> 已验证本机QA环境：Node /Users/jiangdeliang/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node；playwright模块在 /Users/jiangdeliang/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules；浏览器缓存 /Users/jiangdeliang/Documents/Codex/2026-10-15/files-mentioned-by-the-user-codex/work/pw-browsers；Chromium151已由外部编排成功启动。测试使用Node自带assert + require('playwright')，无需@playwright/test。脚本不要硬编码我的机器路径；通过NODE_PATH、PLAYWRIGHT_BROWSERS_PATH和E2E_BASE_URL等显式变量配置。可添加仅开发依赖的package.json，但应用运行仍零依赖。Claude沙箱若阻止浏览器的macOS进程注册，不要反复尝试突破；交给外部编排运行同一个测试并回填真实输出。
+> 目标前端：中文认知诊断仪表盘；12人切换；当前学生雷达/5行概率对照表/5节点5边前置图；另展示全体12×5概率表以明确满足矩阵展现。图谱箭头前置→后续，节点同时显示名称/百分比，数据来自6个真实GET接口；合成小样本提示；相关题答对率明确仅作对照；可访问语义、可见焦点、中文加载/错误/重试；390px无页面横向溢出。不得把算法或内部实现细节塞满主要操作界面。
+> 编写约7组有价值的真实浏览器检查：首屏加载/12名学生；所选学生数值与API逐项一致、SVG图形数据取自该学生；切换及快速切换无旧请求覆盖；图谱5节点5箭头正确；全体12×5表/API不泄露profile_id；模拟网络失败显示中文错误与重试并能恢复；手机布局与键盘选择。捕获未处理JS错误并失败。另补HTTP静态MIME/编码路径穿越测试。选择稳定语义或data-testid契约，不用脆弱坐标。可在首次E2E失败时截屏供诊断。
+> 请写tests/browser_e2e.cjs并明确如何启动/关闭测试服务、返回非零失败码。先实际跑HTTP静态测试和可运行的E2E得到RED，保存docs/validation/frontend-red.txt和真实结果；若沙箱阻止浏览器，报告准确原因等待外部运行，不伪称页面验收成功。记录本条Prompt和意图。不写.git，完成后等待前端实现指令。
+
+说明：批准进入浏览器 E2E 测试先行阶段；只写测试与前端验收说明、不写页面；用 Node assert + require('playwright') 写约 7 组浏览器检查 + HTTP 静态 MIME/编码/路径穿越测试，跑出真实 RED 并保存 frontend-red.txt。
+
+### 提示词 14（余额恢复 + 独立复核发现的 7 组 E2E 测试缺陷纠偏，全文）
+
+> 余额已恢复，继续同一项目。上轮tests/browser_e2e.cjs已写入后遇到402；网页仍未实现。外部编排已跑--http-only得到真实RED，记录在docs/validation/frontend-red-http-external.txt。先修复独立复核发现的E2E测试自身问题，不写页面，不重新分析需求，不重复环境核验：
+> 1. B1 attached后立即数options有竞态。等待12个有效选项/可用选择器；B2/B4/B5/B7等待真实数据行/节点/数值完整后再断言。
+> 2. B6主动route.abort会产生预期console.error net::ERR_FAILED，不能与未处理JS错误混为一谈。保留pageerror零容忍，只豁免被注入明确URL对应的预期网络错误。
+> 3. 重试等待错误态不可见，而非必须DOM移除；同时等待学生3实际诊断数值更新。
+> 4. 加载态检查不能用空catch吞掉断言。用可释放请求屏障固定加载状态，验证中文加载提示后释放。
+> 5. B3竞态用确定时序：确认旧请求已发出/被拦截→切新学生→等新数据→释放旧请求→再次验证名称/表格/雷达/图谱，正确处理AbortController取消，不靠800/1200ms固定睡眠。
+> 6. 雷达不能只查data-values，校验实际polygon/path几何随API值变化（可冻结data-testid=radar-polygon、data-center/data-radius等可核验几何契约）；marker-end须引用存在的marker；SVG <g>文本用textContent。
+> 7. 全体矩阵验证60个唯一(student_id,kp_id)集合；手机检查5节点完整可见，键盘切换后等实际学生12数值。名称优先来自真实API避免硬编码不必要误杀。
+> 记录上轮实际Prompt与本条纠偏意图，创建必要package.json只含QA devDependency playwright1.62.1，应用零运行依赖。测试脚本的环境变量仅明确读取自己的E2E配置，不打印或读取其它环境/凭据。更新前端契约文档。脚本语法检查和HTTP-only可跑，浏览器/端口若沙箱阻止交给外部编排。不要写.git，完成后等待前端实现指令。
+
+说明：告知余额恢复并已由外部编排跑出 --http-only 真实 RED（frontend-red-http-external.txt）；给出 7 组对 E2E 测试自身的纠偏（竞态等待、注入网络错误豁免、重试等待、加载态请求屏障、B3 确定时序与 AbortController、雷达几何与 marker 引用、60 唯一对/手机完整可见/名称取自 API），并要求创建 package.json（playwright 1.62.1）、前端契约文档、更新 PROMPT_LOG、语法检查与 HTTP-only 可跑。
+
 ### 环境核验（阶段 0，真实命令结果）
 
 - `pwd` → `/private/tmp/claude-homework-t2WpwB`（与要求一致）
@@ -222,4 +247,23 @@
 >   修复后沙箱内 `Ran 60 tests ... FAILED (errors=2)`（仅剩 2 个沙箱 EPERM 端口绑定，非代码缺陷），
 >   存 `docs/validation/backend-green-fixed.txt`；原始 `backend-green.txt` 保留并注明为沙箱内结果。
 
-## 阶段 6：E2E —— 未开始
+## 阶段 6：E2E —— 测试先行（RED，进行中）
+
+> 产物：`tests/browser_e2e.cjs`（浏览器 E2E + HTTP 静态契约测试）、`package.json`
+> （仅 QA devDependency playwright 1.62.1）、`docs/FRONTEND_CONTRACT.md`（前端契约）。
+>
+> 真实命令与结果：
+> - 网页仍未实现（`static/` 目录不存在），故静态 `/`、`/style.css`、`/app.js` 均 404。
+> - 外部编排已在沙箱外原样运行 HTTP 静态部分：
+>   `E2E_BASE_URL=http://127.0.0.1:8765 node tests/browser_e2e.cjs --http-only`
+>   → `3 通过 / 3 失败`，`EXIT_CODE=1`；原始输出存
+>   `docs/validation/frontend-red-http-external.txt`（3 项静态 MIME 测试 RED 于 404，
+>   路径穿越 / 白名单 / API-MIME 3 项通过）。
+> - 独立复核发现 7 组 E2E 测试自身缺陷，已按提示词 14 逐条修复（竞态等待、注入网络
+>   错误豁免、重试等待、加载态请求屏障、B3 确定时序与 AbortController、雷达几何与
+>   marker 引用、60 唯一对/手机完整可见/名称取自 API）。
+> - 本会话内验证：`node --check tests/browser_e2e.cjs` → 语法通过（SYNTAX_OK）；
+>   `python3 -m src.seed` 生成临时库成功；`python3 -m src.server … 8017` 绑定端口时
+>   `socket.bind → PermissionError: Operation not permitted`（沙箱禁用本机端口绑定），
+>   故 HTTP-only / 浏览器 E2E 无法在沙箱内起服务运行，交由外部编排以同一命令运行。
+> - 浏览器/端口若受沙箱限制，由外部编排以同一命令运行并回填真实输出；不伪称页面验收成功。
