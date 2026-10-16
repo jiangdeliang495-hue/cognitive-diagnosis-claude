@@ -389,6 +389,33 @@
 
 说明：外部首次完整后端回归 144 tests、142 通过、2 errors，均为新增测试自身命名错误——两个测试把局部变量 `http` 赋为预期 HTTP 整数，遮蔽模块名导致 `http.client.HTTPConnection` 报 `AttributeError`。最小改名 `http → expected_http`（保留全部状态码/脱敏断言，不删不降），如实记为测试修正而非业务失败；上一轮两处真实 HTTPResponse 边界修复保持 GREEN。
 
+### 提示词 32（LLM 建议前端实现指令，全文）
+
+> 保持Max，后端已完成外部完整GREEN验收（真实结果由Codex存docs/validation/advice-backend-external-final.txt）。现进入前端实现阶段，仅改static/index.html、app.js、style.css及必要真实日志；不改DINA、数据库、后端契约，不操作Git/推送/邮件，不读真实Key。
+> 先阅读冻结docs/LLM_SUGGESTIONS.md与tests/advice_e2e.cjs。该文件的C1-C6已在旧版真实浏览器外部RED：0通过/6失败，全部因未实现建议区/按钮/配置提示；记录docs/validation/advice-e2e-red-external.txt，不是浏览器权限错误。保持原15组前端回归。
+> 实现"AI学习建议"卡片：只有当前学生详情成功后才读取GET /api/llm/status并启用对应UI，配置缺失显示简短中文"未配置"说明，不暴露env/key等实现细节；真实生成按钮仅点击才POST /api/students/{id}/advice，JSON{}，生成中禁用；单独loading/error/retry，不影响现有诊断；失败后不自动重试，只有手动重试才第二次请求。
+> 切学生立即清空旧建议并abort旧等待；当前学生ID+请求序号双校验，A→B→A时最早A的旧响应不能覆盖新A；状态请求/详情加载也防旧响应启用错学生按钮。缺配置后服务重启/刷新状态可恢复。建议summary、每个priority的知识点名称、reason、actions、check全部用DOM/textContent安全渲染，模型字符串不允许innerHTML（包括恶意HTML字面文本）。展示清楚AI来源DeepSeek V4 Pro与最高思考，提示是基于合成诊断的学习建议，不改掌握概率本身。
+> 可访问性：native button、关联标题、独立状态aria-live和错误role=alert，真实Tab+Space/Enter可操作；390px长英文词正常换行、无页面横向溢出；沿用现有简洁中文卡片视觉，不加大框架或依赖、无CDN。
+> 严守已有data-testid，具体以测试契约为准。新建议UI不能复用全局loading/error/retry导致旧测试混淆。基础诊断失败时禁用生成并清空建议，不能拿上一学生数据生成。
+> 运行能运行的静态/语法检查，浏览器受沙箱限制则交Codex外部运行，不伪造GREEN。若发现确定测试自身错误仅最小修正并如实记录，不能删失败断言或降低契约。完成后停止等外部前端验收，最后README/PRD/架构/开发说明/LLM文档和PDF在验收结果齐全后再统一同步，不提前声称真实DeepSeek调用已成功（真实Key尚未配置，所有目前测试均mock）。
+
+说明：批准进入前端 GREEN——仅改 static/index.html、app.js、style.css 与真实日志；后端外部完整 GREEN 已落盘（advice-backend-external-final.txt）。按冻结 UI 契约实现「AI 学习建议」卡片：详情成功后才读状态、仅点击才付费 POST、生成中禁用、独立 loading/error/retry、手动重试、切学生清空+abort+学生 ID/序号双校验、状态请求防旧响应、textContent 安全渲染、DeepSeek V4 Pro 来源提示、native button/aria-live/alert、390px 长词换行；不伪造浏览器 GREEN（沙箱限制交 Codex 外部运行）。
+
+### 提示词 34（前端外部验收通过后，独立复核发现状态错误误报的精确修复，全文）
+
+> 保持 DeepSeek V4 Pro Max。外部前端验收结果：docs/validation/advice-e2e-green-external.txt 为 C1-C6 6/6；docs/validation/frontend-regression-with-advice.txt 为原15/15。独立只读复核发现一处明确业务错误：static/app.js loadAdviceStatus catch 将网络异常、HTTP500、非法JSON统一显示为“未配置模型服务密钥”，已配置服务短暂失败也会误导用户。请做最小修复。
+> 先在既有 tests/advice_e2e.cjs C5 中补充状态查询失败→独立中文错误→手动只重试GET状态→配置成功启用按钮的断言；状态失败不能显示“未配置”，不能发付费POST；包括切学生后旧状态失败不得污染新学生。保持6组的其他断言与原15回归。外部QA稍后执行，不谎称沙箱浏览器通过。
+> 实现明确状态错误与手动重试（可使用现有独立advice-error/advice-retry并区分重试状态/生成模式，或独立按钮，以最小可靠实现为准）。只有成功GET且configured===false才缺配置；网络失败/HTTP失败/非法JSON显示“无法获取模型配置状态，请重试”。状态重试只GET，不POST，成功后仍必须点击生成才付费。切换清空，状态序号与学生双校验保持，生成失败的手动重试原行为保持。适量更新LLM契约及真实PROMPT_LOG，不更新最终验收/README，不操作Git、真实Key、推送、邮件。完成后停下等外部再验收。
+
+说明：外部前端验收 C1–C6 6/6、原 15/15 全绿后，独立只读复核发现一处明确业务错误——loadAdviceStatus 的 catch 把网络异常/HTTP500/非法 JSON 一律显示为「未配置」，已配置服务的短暂失败会误导用户。最小修复：先在既有 C5 补状态失败→独立中文错误→仅 GET 重试→恢复后仍须点击生成、以及切学生旧状态失败不污染新学生的断言；实现「只有成功 GET 且 configured===false 才判未配置」、状态失败显示「无法获取模型配置状态，请重试」、advice-retry 按模式区分（状态重试只 GET / 生成重试 POST）；不更新最终验收/README。
+
+### 提示词 35（外部 5/6 仅 C5 迟到 console 误判，测试 fixture 最小修正，全文）
+
+> 保持Max。外部复跑记录 docs/validation/advice-e2e-status-fix-external.txt：5/6，仅C5末尾严格console检查失败，文本“Failed to load resource: the server responded with a status of 500 (Internal Server Error)”。C5所有业务断言已经走完，失败是故意注入500的console事件晚到而clearExpectFail提前清空的测试异步竞态。不要改业务、不要删断言或全局忽略资源错误。
+> 请最小修正tests/advice_e2e.cjs预期失败资源过滤：只允许该case明确注入的失败请求URL与确切已知5xx状态的console资源错误，依据consoleMessage.location().url匹配；考虑该故意失败console可能晚于UI状态出现，保留该case已注入记录直至page关闭，而不是提前clear导致迟到日志误判。其他URL、其他console.error、所有pageerror继续零容忍。若location缺失不能泛化豁免。C4原502也保持严格作用域。保留C1-C6全部业务断言，如实记录是测试fixture修正、外部5/6。不要声称本轮真实API成功、不操作Git、不读Key。完成停下等外部。
+
+说明：外部复跑 5/6（`docs/validation/advice-e2e-status-fix-external.txt`），仅 C5 末尾严格 console 检查失败——故意注入的 500 的 console 事件晚于 UI 状态出现，而 `clearExpectFail` 提前清空导致迟到日志误判；C5 全部业务断言已走完。最小修正（仅测试 fixture，不改业务、不删断言、不全局忽略资源错误）：预期失败豁免改为按 console 消息 `location().url` 与该 case 明确注入 URL 精确匹配 + 确切 5xx 状态；注入记录保留至页面关闭（移除提前 clear），`location` 缺失不泛化豁免；C4 的 502 同样严格作用域；C1–C6 全部业务断言保留。
+
 ### 环境核验（阶段 0，真实命令结果）
 
 - `pwd` → `/private/tmp/claude-homework-t2WpwB`（与要求一致）
@@ -590,4 +617,26 @@
 > - 修正后沙箱内：`tests.test_advice` 43/43 OK；全套 `Ran 110 tests ... FAILED (errors=9)`，
 >   9 个错误仍全部为沙箱 socket.bind EPERM（HTTP/socket 由 Codex 沙箱外再执行），零业务失败
 >   （记录追加于 `docs/validation/advice-green-sandbox.txt`）。
-> - 本轮不读凭据、不操作 Git/推送/邮件；**已停止，等待外部后端验收**，不开始前端与最终文档。
+> - **前端 GREEN（本会话实现，沙箱内可核验部分）**：static/index.html 新增「AI 学习建议」卡片
+>   （advice-section/generate-advice/advice-config-missing/advice-loading/advice-error/advice-retry/
+>   advice-content，全部独立不复用全局 testid）；app.js 实现 clearAdviceUI/loadAdviceStatus/generateAdvice/
+>   renderAdvice——详情成功后才读 GET /api/llm/status、仅点击才付费 POST（体严格 {}、生成中禁用）、
+>   独立 loading/error/retry 且失败不自动重试、切学生立即清空并 abort 旧等待、学生 ID+请求序号双校验
+>   （A→B→A 最早 A 旧响应不覆盖新 A）、状态请求序号防错学生按钮、诊断失败清空建议并禁用生成、
+>   模型字符串全部 textContent 渲染禁 innerHTML、来源标注 DeepSeek V4 Pro；style.css 增按钮/未配置/
+>   建议内容样式与 overflow-wrap 长词换行。
+> - 沙箱内自检：`node --check static/app.js` SYNTAX_OK；HTML/JS data-testid 契约自检 OK；
+>   Python 43 项纯单元 OK、全套 110 项仅 9 个既有沙箱 EPERM（不受前端影响）。
+> - 浏览器 E2E 受沙箱限制，交 Codex 外部运行同一测试并回填真实结果；C1–C6 旧版外部 RED 记录
+>   `docs/validation/advice-e2e-red-external.txt`（0 通过/6 失败，均为未实现建议区，非浏览器权限错误）。
+> - **不提前声称真实 DeepSeek 调用已成功**（真实 Key 尚未配置，所有目前测试均 mock）。
+> - 状态错误误报修复（提示词 34）：C5 补「状态查询失败→独立中文错误→仅 GET 手动重试→恢复后
+>   按钮启用且仍须点击生成；切学生后旧状态失败不污染新学生」断言（外部 QA 稍后执行，不谎称
+>   沙箱浏览器通过）；app.js 修复——只有成功 GET 且 `configured===false` 才显示「未配置」，
+>   网络/HTTP 失败/非法 JSON 显示「无法获取模型配置状态，请重试」，advice-retry 按模式区分
+>   （状态重试只 GET 绝不 POST；生成重试原行为），状态序号与学生双校验、切换清空保持。
+> - 外部前端验收已落盘：`docs/validation/advice-e2e-green-external.txt`（C1–C6 6/6）、
+>   `docs/validation/frontend-regression-with-advice.txt`（原 15/15）。
+> - 沙箱内自检：app.js / advice_e2e.cjs 语法通过；Python 43 项纯单元 OK。
+> - 本轮不读凭据、不操作 Git/推送/邮件；**已停止，等待外部再验收**，README/PRD/架构/开发说明/
+>   LLM 文档与 PDF 待验收结果齐全后再统一同步。

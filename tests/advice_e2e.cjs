@@ -24,7 +24,9 @@
  *   行为：详情成功后 GET /api/llm/status；configured=true 才显示按钮；仅点击才 POST；
  *   切学生清空建议并 abort 旧等待；同学生 ID 的旧请求按序号区分，最晚返回的旧响应
  *   绝不覆盖新建议；长英文单词须换行不产生 390px 横向溢出。
- *   错误豁免：仅对测试显式注入 URL 的预期 5xx 资源 console.error 豁免，
+ *   错误豁免：仅对测试显式注入 URL 的预期资源错误豁免——按 console 消息
+ *   location().url 与该 case 注入 URL 精确匹配、状态码为确切 5xx；注入记录
+ *   保留至页面关闭（容忍故意失败的迟到日志）；location 缺失不泛化豁免；
  *   其余 pageerror 与非预期 console.error 仍零容忍。
  * ========================================================================== */
 
@@ -285,7 +287,7 @@ function browserTests(baseURL) {
   // C4 —— 失败仅一次请求；手动重试恰好第二次；独立于诊断；预期 502 豁免
   tests.push({
     name: 'C4 失败后恰好一次请求，手动重试恰好第二次，不影响诊断区',
-    run: async ({ page, expectFail, clearExpectFail }) => {
+    run: async ({ page, expectFail }) => {
       await mockStatus(page, true);
       let fail = true;
       let attempts = 0;
@@ -318,7 +320,7 @@ function browserTests(baseURL) {
       const retry = page.locator('[data-testid="advice-retry"]');
       await retry.waitFor();
       assert.ok((await retry.innerText()).includes('重试'));
-      clearExpectFail(); // 失败已被消费，恢复零容忍
+      // 预期 502 的注入记录保留至页面关闭，不提前清除（容忍迟到日志；豁免范围按 URL+5xx 严格限定）
       assert.strictEqual(attempts, 1, '失败后必须恰好只有一次付费请求');
       assert.strictEqual(await page.locator('[data-testid="radar-chart"]').count(), 1,
         '建议区错误不得影响诊断区');
@@ -334,19 +336,40 @@ function browserTests(baseURL) {
     },
   });
 
-  // C5 —— 未配置：明确提示、无按钮、零 POST；状态翻转为已配置后仅手动一次生成
+  // C5 —— 状态查询失败 / 未配置 / 恢复：独立中文错误与手动重试（只 GET），
+  //       绝不误报「未配置」、绝不自动发付费 POST；切学生不污染
   tests.push({
-    name: 'C5 未配置提示（可隐藏容器）；状态翻转为已配置后仅手动生成一次',
-    run: async ({ page }) => {
-      let configured = false;
-      await page.route('**/api/llm/status', (route) => route.fulfill({
-        status: 200, contentType: 'application/json',
-        body: JSON.stringify(configured
-          ? { configured: true, provider: 'deepseek', model: 'deepseek-v4-pro',
-              reasoning_effort: 'max' }
-          : { configured: false, provider: null, model: null, reasoning_effort: null }),
-      }));
+    name: 'C5 状态失败→独立错误+仅GET重试→恢复后仅手动一次生成；未配置不误报',
+    run: async ({ page, expectFail }) => {
+      let statusMode = 'fail'; // 'fail' | 'ok' | 'unconfigured'
       let postCount = 0;
+      let statusGets = 0;
+      let onStatusGetResolve = null;
+      const statusGate = () => new Promise((r) => { onStatusGetResolve = r; });
+      await page.route('**/api/llm/status', (route) => {
+        statusGets += 1;
+        if (onStatusGetResolve) {
+          const f = onStatusGetResolve;
+          onStatusGetResolve = null;
+          f();
+        }
+        if (statusMode === 'fail') {
+          route.fulfill({
+            status: 500, contentType: 'application/json',
+            body: JSON.stringify({ error: { code: 'INTERNAL',
+                                            message: '服务器内部错误' } }),
+          });
+        } else {
+          route.fulfill({
+            status: 200, contentType: 'application/json',
+            body: JSON.stringify(statusMode === 'ok'
+              ? { configured: true, provider: 'deepseek', model: 'deepseek-v4-pro',
+                  reasoning_effort: 'max' }
+              : { configured: false, provider: null, model: null,
+                  reasoning_effort: null }),
+          });
+        }
+      });
       await page.route('**/api/students/*/advice', (route) => {
         postCount += 1;
         const sid = parseInt((route.request().url().match(SID_RE) || [])[1], 10);
@@ -354,35 +377,71 @@ function browserTests(baseURL) {
                         body: adviceBody(sid, '配置后生成') });
       });
 
+      expectFail(baseURL + '/api/llm/status'); // 注入的状态 500 为预期资源错误
       await page.goto(baseURL + '/', { waitUntil: 'domcontentloaded' });
       await waitReady(page);
-      const missing = page.locator('[data-testid="advice-config-missing"]');
-      await missing.waitFor({ state: 'visible', timeout: 10000 });
-      assert.ok((await missing.innerText()).includes('未配置'), '须明确提示未配置');
-      // 按钮不可见（允许存在但隐藏的空容器）
-      const btn = page.locator('[data-testid="generate-advice"]');
-      const btnVisible = await btn.isVisible().catch(() => false);
-      assert.ok(!btnVisible, '未配置时按钮不得可见');
-      await page.waitForTimeout(300);
-      assert.strictEqual(postCount, 0);
-      const content = page.locator('[data-testid="advice-content"]');
-      assert.ok(!(await content.isVisible().catch(() => false)),
-        '未配置时绝不伪造可见建议内容');
 
-      // 状态翻转为已配置 → 刷新 → 仅手动一次生成
-      configured = true;
-      await page.reload({ waitUntil: 'domcontentloaded' });
-      await waitReady(page);
-      await btn.waitFor({ state: 'visible', timeout: 10000 });
-      assert.ok(!(await missing.isVisible().catch(() => true)),
-        '已配置后未配置提示不得可见');
-      assert.strictEqual(postCount, 0);
+      const err = page.locator('[data-testid="advice-error"]');
+      const retry = page.locator('[data-testid="advice-retry"]');
+      const missing = page.locator('[data-testid="advice-config-missing"]');
+      const btn = page.locator('[data-testid="generate-advice"]');
+
+      // 状态查询失败：独立中文错误；绝不显示「未配置」；绝不发付费 POST
+      await err.waitFor({ state: 'visible', timeout: 10000 });
+      assert.strictEqual(await err.getAttribute('role'), 'alert');
+      assert.ok((await err.innerText()).includes('无法获取模型配置状态'),
+        '状态失败须明确提示状态错误');
+      assert.ok(!(await missing.isVisible().catch(() => false)),
+        '状态失败不得显示「未配置」');
+      assert.ok(!(await btn.isVisible().catch(() => false)),
+        '状态失败不得显示生成按钮');
+      assert.strictEqual(postCount, 0, '状态失败不得发付费 POST');
+
+      // 手动重试仍失败：只再 GET 一次状态，绝不 POST
+      let gate = statusGate();
+      await retry.click();
+      await Promise.race([gate, timeout(5000, '状态重试 GET 未被捕获')]);
+      assert.ok((await err.innerText()).includes('无法获取模型配置状态'));
+      assert.strictEqual(postCount, 0, '状态重试只 GET，绝不 POST');
+
+      // 状态恢复（configured）：重试成功后按钮启用；仍必须点击生成才付费
+      // （预期 500 的注入记录保留至页面关闭，不提前清除，容忍迟到日志）
+      statusMode = 'ok';
+      gate = statusGate();
+      await retry.click();
+      await Promise.race([gate, timeout(5000, '状态恢复 GET 未被捕获')]);
+      await btn.waitFor({ state: 'visible', timeout: 5000 });
+      await err.waitFor({ state: 'hidden', timeout: 5000 });
+      assert.ok(!(await missing.isVisible().catch(() => false)));
+      assert.strictEqual(postCount, 0, '状态恢复后仍不得自动发付费 POST');
       await btn.click();
       await page.waitForFunction(() => {
         const el = document.querySelector('[data-testid="advice-content"]');
         return el && el.textContent.includes('配置后生成');
       }, undefined, { timeout: 5000 });
-      assert.strictEqual(postCount, 1, '刷新后仍只允许手动生成一次');
+      assert.strictEqual(postCount, 1, '必须点击生成才发付费 POST');
+
+      // 未配置：刷新后明确「未配置」（可见隐藏容器），无按钮、无 POST，且不是错误态
+      statusMode = 'unconfigured';
+      await page.reload({ waitUntil: 'domcontentloaded' });
+      await waitReady(page);
+      await missing.waitFor({ state: 'visible', timeout: 10000 });
+      assert.ok((await missing.innerText()).includes('未配置'), '须明确提示未配置');
+      assert.ok(!(await btn.isVisible().catch(() => false)), '未配置时按钮不得可见');
+      assert.ok(!(await err.isVisible().catch(() => false)), '未配置不是错误态');
+      assert.strictEqual(postCount, 1);
+
+      // 切学生：旧状态失败不得污染新学生（新学生状态成功 → 按钮启用、错误清除）
+      statusMode = 'fail';
+      expectFail(baseURL + '/api/llm/status');
+      await page.locator('[data-testid="student-select"]').selectOption('2');
+      await err.waitFor({ state: 'visible', timeout: 5000 }); // 学生 2 的状态失败
+      statusMode = 'ok';
+      await page.locator('[data-testid="student-select"]').selectOption('3');
+      await btn.waitFor({ state: 'visible', timeout: 5000 }); // 学生 3 状态成功
+      await err.waitFor({ state: 'hidden', timeout: 5000 });
+      assert.ok(!(await missing.isVisible().catch(() => false)));
+      assert.strictEqual(postCount, 1, '切换/状态重试绝不发付费 POST');
     },
   });
 
@@ -457,10 +516,16 @@ async function newPage(context) {
   page.on('console', (m) => {
     if (m.type() !== 'error') return;
     const text = m.text();
-    // 仅豁免本测试显式注入 URL 的预期资源失败（如 C4 故意 mock 502）
+    // 仅豁免本 case 明确注入 URL 的预期资源错误：按 console 消息 location().url 精确匹配
+    // 且状态码为确切 5xx；location 缺失不得泛化豁免；注入记录保留至页面关闭，
+    // 容忍故意失败（500/502）的 console 日志晚于 UI 状态出现。
     if (expectFailUrls.size > 0 &&
-        /Failed to load resource|the server responded with a status of 5/i.test(text)) {
-      return;
+        /Failed to load resource|the server responded with a status of 5\d\d/i.test(text)) {
+      const loc = m.location ? m.location() : null;
+      const url = loc && loc.url ? loc.url : '';
+      if (url && expectFailUrls.has(url)) {
+        return;
+      }
     }
     jsErrors.push(`console.error: ${text}`);
   });
@@ -468,7 +533,6 @@ async function newPage(context) {
     page,
     jsErrors,
     expectFail: (u) => expectFailUrls.add(u),
-    clearExpectFail: () => expectFailUrls.clear(),
     close: () => page.close(),
   };
 }

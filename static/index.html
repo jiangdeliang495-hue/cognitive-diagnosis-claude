@@ -63,6 +63,26 @@
       </div>
     </section>
 
+    <section class="card" aria-labelledby="advice-title">
+      <h2 id="advice-title">AI 学习建议</h2>
+      <p class="hint">由 DeepSeek V4 Pro 生成（最高思考）。基于合成诊断数据的学习建议，
+        仅供参考，不改变掌握概率本身。</p>
+      <div data-testid="advice-section">
+        <div data-testid="advice-config-missing" class="advice-missing" hidden>
+          未配置模型服务密钥，暂不可生成学习建议（服务端配置后刷新页面即可）。
+        </div>
+        <button data-testid="generate-advice" type="button" class="generate-advice" hidden>
+          生成学习建议
+        </button>
+        <div data-testid="advice-loading" class="loading" role="status" hidden>
+          正在生成学习建议…
+        </div>
+        <div data-testid="advice-error" class="error" role="alert" hidden></div>
+        <button data-testid="advice-retry" type="button" class="retry" hidden>重试</button>
+        <div data-testid="advice-content" class="advice-content" hidden></div>
+      </div>
+    </section>
+
     <section class="card">
       <details>
         <summary>关于本模型</summary>

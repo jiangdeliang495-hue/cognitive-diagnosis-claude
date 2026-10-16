@@ -13,6 +13,16 @@
     diagnosis: null,     // {matrix:[{student_id,kp_id,prob}]}
     currentId: null,
     abortController: null,
+    kpNames: {},         // 当前学生详情里的 kp_id → 名称（建议渲染用）
+  };
+
+  // AI 学习建议区独立状态（不复用全局 loading/error/retry，避免与诊断区混淆）
+  var adviceState = {
+    studentId: null,       // 建议区当前归属的学生
+    seq: 0,                // 付费请求序号（防旧响应覆盖）
+    statusSeq: 0,          // 状态请求序号（防旧状态启用错学生按钮）
+    abortController: null, // 当前付费请求的 AbortController
+    retryMode: null,       // null | 'status'（重试只 GET 状态）| 'generate'（重试付费 POST）
   };
 
   function $(sel) {
@@ -302,10 +312,12 @@
     var ac = new AbortController();
     state.abortController = ac;
 
-    // 请求开始：立即清空旧诊断、清旧错误、显示中文加载态，避免旧数据归属到新学生。
+    // 请求开始：立即清空旧诊断、清旧错误、显示中文加载态，避免旧数据归属到新学生；
+    // 同时清空建议区并中止旧建议等待（切换/失败时绝不拿上一学生数据生成）。
     var name = (state.students.find(function (s) { return s.id === id; }) ||
       { name: '学生' + id }).name;
     clearCurrentDiagnosis();
+    clearAdviceUI();
     hideError();
     showLoading();
     currentEl.textContent = name + '（加载中）';
@@ -323,17 +335,190 @@
       renderStudent(data);
       hideError();
       hideLoading(); // 仅当前请求成功才结束加载
+      state.kpNames = {};
+      data.mastery.forEach(function (m) { state.kpNames[m.kp_id] = m.name; });
+      loadAdviceStatus(id); // 详情成功后才读取状态并启用对应 UI
     } catch (e) {
       if (e.name === 'AbortError' || ac.signal.aborted) {
         return; // 旧请求被中止，不影响新请求的加载/错误状态
       }
-      // 请求失败：诊断保持清空，明确标记失败，不把旧学生数据当作当前显示。
+      // 请求失败：诊断保持清空，明确标记失败，不把旧学生数据当作当前显示；
+      // 基础诊断失败时禁用生成并清空建议。
       currentEl.textContent = name + '（加载失败）';
+      clearAdviceUI();
       hideLoading();
       showError('学生数据加载失败，请重试', function () {
         loadStudentDetail(id);
       });
     }
+  }
+
+  // ---- AI 学习建议（独立 loading/error/retry，仅点击才付费 POST） ----
+
+  function clearAdviceUI() {
+    if (adviceState.abortController) {
+      adviceState.abortController.abort();
+    }
+    adviceState.abortController = null;
+    adviceState.seq += 1;
+    adviceState.studentId = null;
+    adviceState.retryMode = null;
+    $('[data-testid="advice-content"]').textContent = '';
+    $('[data-testid="advice-content"]').hidden = true;
+    $('[data-testid="advice-loading"]').hidden = true;
+    $('[data-testid="advice-error"]').hidden = true;
+    $('[data-testid="advice-retry"]').hidden = true;
+    $('[data-testid="advice-config-missing"]').hidden = true;
+    var btn = $('[data-testid="generate-advice"]');
+    btn.hidden = true;
+    btn.disabled = false;
+  }
+
+  async function loadAdviceStatus(id) {
+    // 学生详情成功后才读取状态；序号+学生 ID 双校验，旧状态响应不得启用错学生按钮
+    adviceState.studentId = id;
+    var mySeq = ++adviceState.statusSeq;
+    try {
+      var resp = await fetch('/api/llm/status');
+      if (!resp.ok) {
+        throw new Error('HTTP ' + resp.status);
+      }
+      var data = await resp.json();
+      if (adviceState.studentId !== id || mySeq !== adviceState.statusSeq) {
+        return;
+      }
+      if (data && data.configured === true) {
+        $('[data-testid="advice-config-missing"]').hidden = true;
+        $('[data-testid="advice-error"]').hidden = true;
+        $('[data-testid="advice-retry"]').hidden = true;
+        adviceState.retryMode = null;
+        var btn = $('[data-testid="generate-advice"]');
+        btn.disabled = false;
+        btn.hidden = false;
+      } else {
+        // 只有成功 GET 且 configured === false 才判定「未配置」
+        $('[data-testid="generate-advice"]').hidden = true;
+        $('[data-testid="advice-error"]').hidden = true;
+        $('[data-testid="advice-retry"]').hidden = true;
+        adviceState.retryMode = null;
+        $('[data-testid="advice-config-missing"]').hidden = false;
+      }
+    } catch (e) {
+      if (adviceState.studentId !== id || mySeq !== adviceState.statusSeq) {
+        return; // 旧状态响应/失败不得污染当前学生
+      }
+      // 网络异常 / HTTP 失败 / 非法 JSON：显示独立的状态错误 + 手动重试（只重试 GET 状态，
+      // 绝不 POST），不得把短暂失败误报成「未配置」
+      $('[data-testid="generate-advice"]').hidden = true;
+      $('[data-testid="advice-config-missing"]').hidden = true;
+      $('[data-testid="advice-error"]').textContent = '无法获取模型配置状态，请重试';
+      $('[data-testid="advice-error"]').hidden = false;
+      $('[data-testid="advice-retry"]').hidden = false;
+      adviceState.retryMode = 'status';
+    }
+  }
+
+  async function generateAdvice() {
+    var id = adviceState.studentId;
+    var btn = $('[data-testid="generate-advice"]');
+    if (!id || btn.disabled) {
+      return;
+    }
+    if (adviceState.abortController) {
+      adviceState.abortController.abort();
+    }
+    var ac = new AbortController();
+    adviceState.abortController = ac;
+    var mySeq = ++adviceState.seq;
+
+    $('[data-testid="advice-content"]').textContent = '';
+    $('[data-testid="advice-content"]').hidden = true;
+    $('[data-testid="advice-error"]').hidden = true;
+    $('[data-testid="advice-retry"]').hidden = true;
+    adviceState.retryMode = null;
+    $('[data-testid="advice-loading"]').hidden = false;
+    btn.disabled = true; // 生成中禁用，防连点
+
+    try {
+      var resp = await fetch('/api/students/' + id + '/advice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{}',
+        signal: ac.signal,
+      });
+      var data = null;
+      var errMessage = null;
+      if (resp.ok) {
+        data = await resp.json();
+      } else {
+        try {
+          var errData = await resp.json();
+          errMessage = errData && errData.error && errData.error.message;
+        } catch (e) { /* 非 JSON 错误体 */ }
+        if (!errMessage) {
+          errMessage = 'HTTP ' + resp.status;
+        }
+      }
+      if (ac.signal.aborted || mySeq !== adviceState.seq ||
+          adviceState.studentId !== id) {
+        return; // 旧响应：学生 ID + 请求序号双校验，绝不覆盖新状态
+      }
+      if (data) {
+        if (data.student_id !== id) {
+          throw new Error('响应学生不匹配');
+        }
+        renderAdvice(data.advice);
+        $('[data-testid="advice-loading"]').hidden = true;
+        $('[data-testid="advice-content"]').hidden = false;
+        btn.disabled = false;
+      } else {
+        throw new Error(errMessage);
+      }
+    } catch (e) {
+      if (e.name === 'AbortError' || ac.signal.aborted) {
+        return; // 有意中止（切学生），不视为错误
+      }
+      if (mySeq !== adviceState.seq || adviceState.studentId !== id) {
+        return; // 旧请求失败不得污染当前状态
+      }
+      $('[data-testid="advice-loading"]').hidden = true;
+      var shown = (typeof e.message === 'string' && /[一-鿿]/.test(e.message))
+        ? e.message : '生成学习建议失败，请手动重试';
+      $('[data-testid="advice-error"]').textContent = shown;
+      $('[data-testid="advice-error"]').hidden = false;
+      $('[data-testid="advice-retry"]').hidden = false;
+      adviceState.retryMode = 'generate';
+      btn.disabled = false; // 失败可手动重试，绝不自动重试
+    }
+  }
+
+  function renderAdvice(advice) {
+    // 模型字符串全部用 textContent/DOM API 渲染，禁止 innerHTML（含恶意 HTML 字面文本）
+    var box = $('[data-testid="advice-content"]');
+    box.textContent = '';
+    var summary = document.createElement('p');
+    summary.textContent = advice.summary;
+    box.appendChild(summary);
+    var list = document.createElement('ul');
+    (advice.priorities || []).forEach(function (item) {
+      var li = document.createElement('li');
+      var name = state.kpNames[item.kp_id] || ('KP' + item.kp_id);
+      var head = document.createElement('strong');
+      head.textContent = name + '：' + item.reason;
+      li.appendChild(head);
+      var actions = document.createElement('ul');
+      (item.actions || []).forEach(function (a) {
+        var al = document.createElement('li');
+        al.textContent = a;
+        actions.appendChild(al);
+      });
+      li.appendChild(actions);
+      var check = document.createElement('p');
+      check.textContent = '检查方法：' + item.check;
+      li.appendChild(check);
+      list.appendChild(li);
+    });
+    box.appendChild(list);
   }
 
   async function loadInitial() {
@@ -357,6 +542,17 @@
       showError('加载失败，请重试', loadInitial);
     }
   }
+
+  // 建议区按钮绑定（native button：点击与键盘 Space/Enter 均可触发）；
+  // 重试按模式区分：状态重试只 GET 状态（绝不 POST），生成重试走付费 POST
+  $('[data-testid="generate-advice"]').addEventListener('click', generateAdvice);
+  $('[data-testid="advice-retry"]').addEventListener('click', function () {
+    if (adviceState.retryMode === 'status' && adviceState.studentId) {
+      loadAdviceStatus(adviceState.studentId);
+    } else {
+      generateAdvice();
+    }
+  });
 
   loadInitial();
 })();

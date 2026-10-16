@@ -1,0 +1,16 @@
+External execution of Claude-authored advice E2E.
+Command: E2E_BASE_URL=http://127.0.0.1:8766 node tests/advice_e2e.cjs
+Advice/status routes are mocked; this is not a paid DeepSeek call.
+被测服务：http://127.0.0.1:8766
+  ✔ C1 首屏/切学生/刷新不自动发付费 POST，configured 才显示按钮
+  ✔ C2 POST 方法/JSON 体/严格{}核对；生成中禁用；各字段字面 HTML 不执行
+  ✔ C3 A→B→A 竞态：最早 A 最后返回，同学生旧请求绝不覆盖新建议
+  ✔ C4 失败后恰好一次请求，手动重试恰好第二次，不影响诊断区
+  ✔ C5 状态失败→独立错误+仅GET重试→恢复后仅手动一次生成；未配置不误报
+  ✔ C6 Tab/Space 键盘激活按钮；390px 长英文单词换行无横向溢出
+
+──────────────────────────────
+结果：6 通过 / 0 失败（共 6 项）
+EXIT_CODE=0
+
+PROCESS_EXIT_CODE=0

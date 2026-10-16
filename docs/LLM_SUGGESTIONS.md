@@ -233,14 +233,20 @@ def status_payload(api_key) -> dict
 | `advice-retry` | 重试按钮（文本「重试」） |
 | `advice-content` | 建议内容（仅 textContent 渲染；含 summary 与 priorities 文本） |
 
-行为：学生详情成功后 GET `/api/llm/status`（非付费）；`configured=false` → 显示
-config-missing、不显示按钮、不可能发 POST；点击才 POST；切学生清空建议并 abort 旧等待；
+行为：学生详情成功后 GET `/api/llm/status`（非付费）；**只有成功 GET 且 `configured=false`**
+才显示 config-missing「未配置」；**状态查询失败（网络异常/HTTP 失败/非法 JSON）绝不误报
+「未配置」**，而是显示独立中文错误「无法获取模型配置状态，请重试」+ advice-retry 手动重试
+（**只重试 GET 状态，绝不发付费 POST**）；状态恢复后按钮启用，但**仍必须点击生成才付费**。
+advice-retry 按模式区分：状态重试（只 GET）与生成重试（付费 POST，原行为）。点击才 POST；
+切学生清空建议/状态失败并 abort 旧等待（旧状态失败不得污染新学生）；
 渲染全部用 textContent/DOM API，禁 innerHTML。
 E2E 备注：
 - **兜底安全网**：先注册 catch-all 路由，任何未被具体 mock 接管的付费 POST 一律 abort 并判违规，
   绝不意外打到真实 API；具体 mock 后注册者优先。
-- C4 故意 mock 502 会产生 Chromium 的预期资源 console.error，测试用 `expectFail(url)` 显式豁免
-  该注入 URL 的失败，其余 pageerror 与非预期 console.error 仍零容忍。
+- 故意 mock 的 500/502 会产生 Chromium 的预期资源 console.error：测试仅当 console 消息
+  `location().url` 与该 case 显式注入 URL **精确匹配**、状态码为**确切 5xx** 时豁免，注入记录
+  保留至页面关闭（容忍故意失败的迟到日志），`location` 缺失不得泛化豁免；
+  其余 pageerror 与非预期 console.error 仍零容忍。
 - C2/C3 用等待「请求已被捕获/已进入挂起 gate/已落定」的确定时序，不用固定 sleep 冒充竞态已测；
   C3 含 A→B→A 且最早 A 最后返回的同学生 ID 旧请求竞态（按请求序号丢弃）。
 - C6 用真实 Tab 遍历 + Space/Enter 键盘激活按钮，不用 focus+鼠标 click 冒充键盘验收；
