@@ -1,0 +1,19 @@
+Actual setup command (Claude Desktop bundled Claude Code 2.1.299):
+claude plugin list
+
+Actual command output copied from this session's tool result:
+Installed plugins:
+
+  ❯ superpowers@claude-plugins-official
+    Version: 7.0.0
+    Scope: user
+    Status: ✔ enabled
+
+Runtime verification:
+Claude Code session 384a7eca-d8ba-4db5-a492-d78a710fd0a1
+Project: /private/tmp/claude-homework-t2WpwB
+Actual Skill call: superpowers:brainstorming
+Result: success=true, is_error=false
+The screenshot 01-superpowers-brainstorming.png records the visible Skill call.
+
+The earlier Directory/Manage screen alone did not establish local Code loading.

@@ -164,6 +164,45 @@
 
 说明：告知余额恢复并已由外部编排跑出 --http-only 真实 RED（frontend-red-http-external.txt）；给出 7 组对 E2E 测试自身的纠偏（竞态等待、注入网络错误豁免、重试等待、加载态请求屏障、B3 确定时序与 AbortController、雷达几何与 marker 引用、60 唯一对/手机完整可见/名称取自 API），并要求创建 package.json（playwright 1.62.1）、前端契约文档、更新 PROMPT_LOG、语法检查与 HTTP-only 可跑。
 
+### 提示词 15（实现前端 static/ 与题库题干修正，全文）
+
+> 浏览器/静态测试已真实RED并提交，现在实现static/index.html、style.css、app.js让E2E通过。继续Superpowers TDD，基于现有契约与测试直接实现，不扩展后端或加入LLM密钥。所有应用文件由你生成，不读取相邻旧项目。
+> 做一个完整清晰的中文"学生认知诊断"界面：浅灰底、深靛蓝强调色、白色卡片、充足间距，系统中文字体，适配桌面和390px。顶部清晰标题/合成样本提示/12名学生选择；核心是雷达+掌握概率/相关题答对率对照表和前置知识图谱；另有全体12×5掌握概率矩阵，突出当前学生、移动端表格容器内滚动；简短可展开模型说明。不用CDN/外部字体/假数据。UI以展示学生诊断为主，不要展示开发过程、测试次数、接口路径等内部细节。
+> 雷达和知识图谱都用真实SVG与当前API数据，知识图谱5节点5箭头，节点有名称+百分比，明确箭头"前置→后续"；不能仅以颜色传达状态。概率用百分比展示，答对率明确仅作对照。加载/错误/重试都中文且有status/alert语义；快速切换用AbortController或请求序号防旧结果覆盖；请求失败不能把旧学生数据当作当前显示；可见键盘焦点、关联label、图表文本替代。遵循已建立的E2E定位契约，不删除或减弱有价值的测试。
+> 另有一个与已批准测量设计直接相关的题库质量修正：当前seed._question_stems重复输出类型短语，且_KP_TASK[5]写"列式并求算术结果"，与仅测KP5契约冲突。请把24题改成24条不同的简短中文合成题干，逐条与冻结Q对应；单技能KP5三题只判断数量关系/列式并给出算术结果，不要求再算加减乘除。单技能KP3题如需通分结果应直接给出，避免暗测KP2；综合题需体现对应的多个需求。数据规模、Q、X生成和数值估计逻辑保持冻结。此处是演示题干，不添加答题/自动评分功能；文档明确合成示例。
+> 跑全部Python测试和真实浏览器E2E；若Claude沙箱阻止浏览器，准确报告并交由外部编排运行你写的脚本，不反复突破，也不伪称测试成功。保存真实命令/退出码/结果和桌面/手机截图位置；更新PROMPT_LOG，未通过项不得打勾。不要写.git、不推送。完成后简报，等待最终QA和交付文档指令。
+
+说明：批准进入前端 GREEN——按已冻结契约实现 static/index.html、style.css、app.js 使 E2E 通过，并做题库题干质量修正（24 条互不相同、KP5 单技能给出算术结果、KP3 单技能不暗测 KP2）；按 TDD 先补题干测试再实现；跑全部 Python 测试与真实浏览器 E2E（沙箱限制部分交由外部编排）。
+
+### 提示词 16（外部浏览器验收反馈 + 独立 UI 复核纠偏，全文）
+
+> 外部真实浏览器验收已运行，结果12/13通过，唯一测试失败是B7：macOS Chromium下对select按End没有选中学生12。完整输出在docs/validation/frontend-external-initial.txt。请保留有效测试，不用selectOption替代键盘断言；为select显式处理Home/End（设置首/末选项并触发同一change加载逻辑），保持方向键/原生可访问性。
+> 独立UI复核另有两项实际问题需要先补最小回归测试再修：
+> 1. loadStudentDetail开始时仍显示上一学生的雷达/概率表/图谱；新学生失败后标题写新学生加载失败，图表却留旧值，归属错误。请求开始立即清空或隐藏旧的三块当前诊断，清旧错误，显示中文加载态；成功后才显示新数据；失败持续隐藏。仅当前请求能结束loading，旧请求Abort不能覆盖新请求状态。已加载的学生select应保持可切换（B3仍可并发切换），全体矩阵可以保留且每行标名正确。
+> 2. 图谱KP5的白色完整长名称画在直径60的圆内，文字超圆后在白底不可读。把节点名称用深色放在圆外或分行，圆内只放百分比；完整名称在节点可见文本/可访问文本中保留，避免缩小字到不可读。雷达你已扩大viewBox并缩短标签，不要重复改未有问题处；截图确认桌面/390px长字均完整、无裁切。
+> "关于本模型"补一段已约定的简短说明：固定均匀先验；推断保留32画像；DAG单调只用于造数；guess/slip[.02,.35]；独立Bernoulli合成噪声与小样本局限。放折叠说明中，不堆到主流程。
+> 真实按RED→修复执行，保存必要回归输出和Prompt意图。浏览器/端口受沙箱阻止时不要反复尝试，由外部编排重跑。已存在前端测试提交3a21168，记录实际状态，不写.git。完成后用中文简短报告，等待最终QA和交付文档指令。
+
+说明：告知外部浏览器验收 12/13（仅 B7 失败于 macOS Chromium 原生 select 不响应 End），并给出独立 UI 复核的两项问题（①切换/失败时旧诊断未清空导致归属错误；②图谱 KP5 白色长名溢出圆不可读），要求先补最小回归测试再按 TDD 修复，并补「关于本模型」约定说明；记录前端测试提交 3a21168。
+
+### 提示词 17（基于实际桌面/390px 截图的两处小型可读性修正，全文）
+
+> 补充来自实际桌面/390px截图的两个小型可读性修正（只调渲染/CSS，不改变数值、Q/X、接口或测试断言，不需要为低影响样式写镜像测试）：
+> 1. 雷达标签与百分比目前分别放在R+26、R*prob+15处；概率接近1时同一轴上两段文字重叠。请把每轴名称和百分比作为固定外侧的两行排在一起，例如名称基线-5、百分比基线+11，留足viewBox边距，名称/数值约12/11px，不再随概率顶点位置放百分比。多边形顶点仍R*prob，几何契约不变。
+> 2. 手机全体矩阵首列被压到"学/生/05"多行，行高异常。给学生首列white-space:nowrap与合理最小宽度（约80–90px），表格仍只在自身容器内横向滚动，页面无溢出。可使首列粘附但不是必需；不要缩小字体。
+> 此前09b的旧数据归属、节点长名称和模型说明修复继续保留。不要因此扩大布局或加新功能。外部编排将统一重跑13组浏览器与全部Python测试。记录本条实际Prompt及意图，完成后等待最终QA和交付文档指令，不写.git。
+
+说明：基于实际桌面/390px 截图的两处低影响样式修正——① 雷达每轴名称与百分比改为固定外侧两行（名称基线 R+21、百分比基线 R+37，约 12/11px，百分比不再随概率顶点定位），多边形顶点仍 R×prob、几何契约不变；② 手机全体矩阵首列加 `white-space:nowrap` 与 `min-width:90px`，避免「学/生/05」多行，表格仍在容器内滚动。不改数值/Q/X/接口/测试断言，不写镜像测试。
+
+### 提示词 18（外部 79/15 全绿后，截图复查发现两处样式未生效的精确修正，全文）
+
+> 外部真实验收现在79项Python通过、15组前端通过，记录分别为docs/validation/python-external-final.txt、frontend-external-final.txt。但截图复查发现09c的两个样式修正尚未真正生效，原因已确定，只需下面两个精确最小修正，不再分析方案，不写新测试，不改任何数值/多边形几何/数据契约：
+> 1. index.html全体矩阵table只有data-testid，没有id；style.css的#all-students-table所有规则因此无效。给该table添加id="all-students-table"，保持data-testid，现有nowrap/min-width90等CSS即可生效。
+> 2. 雷达现在namePt=vertex(k,R+21)、valPt=vertex(k,R+37)，这仍是沿半径错位，在左右轴上文字仍重叠。请改为每轴共用一个外侧锚点lp=vertex(k,R+32)，名称和百分比用完全相同的x=lp[0]；名称y=lp[1]-5，百分比y=lp[1]+11（固定垂直16px两行），字体12/11，text-anchor middle。不是两个不同半径的点。保持340viewBox、R/cx/cy、valuePts不变。
+> 记录此Prompt/实际79与15通过结果和意图，语法检查即可，截图和浏览器复核由外部编排做。不要派子代理/重做需求/TDD，不写.git。完成后等待交付文档指令。
+
+说明：外部真实验收 79 项 Python、15 组前端全绿；截图复查确认上一轮两处样式修正未真正生效的根因——① 全体矩阵 `<table>` 只有 `data-testid` 没有 `id`，使 `#all-students-table` 的 CSS 全部无效；② 雷达名称/百分比仍是两个不同半径的错位点，左右轴仍重叠。按最小修正：给 table 补 `id`；雷达每轴共用同一锚点 `lp=vertex(k,R+32)`，名称 `y=lp.y-5`、百分比 `y=lp.y+11`（相同 x、middle、12/11px）。不改数值/多边形几何/数据契约，不写新测试。
+
 ### 环境核验（阶段 0，真实命令结果）
 
 - `pwd` → `/private/tmp/claude-homework-t2WpwB`（与要求一致）
@@ -247,23 +286,52 @@
 >   修复后沙箱内 `Ran 60 tests ... FAILED (errors=2)`（仅剩 2 个沙箱 EPERM 端口绑定，非代码缺陷），
 >   存 `docs/validation/backend-green-fixed.txt`；原始 `backend-green.txt` 保留并注明为沙箱内结果。
 
-## 阶段 6：E2E —— 测试先行（RED，进行中）
+## 阶段 6：E2E —— RED 已提交，前端 GREEN 已实现（待外部浏览器验收）
 
 > 产物：`tests/browser_e2e.cjs`（浏览器 E2E + HTTP 静态契约测试）、`package.json`
-> （仅 QA devDependency playwright 1.62.1）、`docs/FRONTEND_CONTRACT.md`（前端契约）。
+> （仅 QA devDependency playwright 1.62.1）、`docs/FRONTEND_CONTRACT.md`（前端契约）、
+> `static/index.html`、`static/style.css`、`static/app.js`（前端实现）。
 >
-> 真实命令与结果：
-> - 网页仍未实现（`static/` 目录不存在），故静态 `/`、`/style.css`、`/app.js` 均 404。
-> - 外部编排已在沙箱外原样运行 HTTP 静态部分：
+> **RED（真实，已由外部编排提交）**
+> - 网页未实现时，外部编排原样运行 HTTP 静态部分：
 >   `E2E_BASE_URL=http://127.0.0.1:8765 node tests/browser_e2e.cjs --http-only`
->   → `3 通过 / 3 失败`，`EXIT_CODE=1`；原始输出存
->   `docs/validation/frontend-red-http-external.txt`（3 项静态 MIME 测试 RED 于 404，
->   路径穿越 / 白名单 / API-MIME 3 项通过）。
-> - 独立复核发现 7 组 E2E 测试自身缺陷，已按提示词 14 逐条修复（竞态等待、注入网络
->   错误豁免、重试等待、加载态请求屏障、B3 确定时序与 AbortController、雷达几何与
->   marker 引用、60 唯一对/手机完整可见/名称取自 API）。
-> - 本会话内验证：`node --check tests/browser_e2e.cjs` → 语法通过（SYNTAX_OK）；
->   `python3 -m src.seed` 生成临时库成功；`python3 -m src.server … 8017` 绑定端口时
->   `socket.bind → PermissionError: Operation not permitted`（沙箱禁用本机端口绑定），
->   故 HTTP-only / 浏览器 E2E 无法在沙箱内起服务运行，交由外部编排以同一命令运行。
-> - 浏览器/端口若受沙箱限制，由外部编排以同一命令运行并回填真实输出；不伪称页面验收成功。
+>   → `3 通过 / 3 失败`，`EXIT_CODE=1`；原始输出存 `docs/validation/frontend-red-http-external.txt`
+>   （3 项静态 MIME 测试 RED 于 404，路径穿越 / 白名单 / API-MIME 3 项通过）。
+> - 独立复核发现的 7 组 E2E 测试自身缺陷已按提示词 14 逐条修复。
+>
+> **GREEN（本会话实现，沙箱内可核验部分）**
+> - 实现 `static/index.html`（语义骨架：viewport、标题、label 关联、loading/error/retry、
+>   局限提示、可展开模型说明）、`static/style.css`（浅灰底 / 深靛蓝 / 白卡片 / 系统中文字体 /
+>   390px 响应式 / 矩阵容器内滚动 / 可见焦点）、`static/app.js`（AbortController 防陈旧覆盖、
+>   中文加载/错误/重试、雷达与图谱 SVG、12×5 矩阵、突出当前学生）。
+> - 题库题干修正：`src/seed.py` 用冻结的 `_QUESTION_STEMS`（24 条互不相同）替换重复短语；
+>   KP5 单技能只考列式并给出算术结果，KP3 单技能不要求自行通分。数据规模/Q/X/估计逻辑冻结。
+> - 按 TDD 先补 `tests/test_seed.py::test_question_stems_distinct_descriptive_and_isolated`
+>   （RED：`14 != 24`）再实现（GREEN）。全套测试总数变为 **79**（外部编排可全部跑绿）。
+> - 沙箱内真实结果（存 `docs/validation/frontend-green-sandbox.txt`）：
+>   `python3 -m unittest discover -s tests -v` → `Ran 61 tests ... FAILED (errors=2)`，`EXIT_CODE=1`；
+>   59 项全部通过，仅 2 个 HTTP 绑定测试因沙箱 `socket.bind → PermissionError: Operation not permitted`
+>   而报错（test_api.setUpClass 与 test_cli 端口绑定，非代码缺陷）。`node --check static/app.js`
+>   与 `node --check tests/browser_e2e.cjs` 均通过。
+>
+> **浏览器 E2E（外部已运行 12/13，修复后待重跑）**
+> - 沙箱禁用本机端口绑定（`socket.bind` EPERM），本会话无法起服务运行浏览器 E2E。
+> - 外部编排首次真实运行（存 `docs/validation/frontend-external-initial.txt`）：
+>   `12 通过 / 1 失败`（HTTP 静态 6/6 + B1–B6 全过）；唯一失败 B7「键盘 End 应选中学生 12」——
+>   macOS Chromium 原生 `<select>` 不响应 `End`。
+> - 按提示词 16 修复：① app.js 为 select 显式 `keydown` 处理 `Home`/`End`（设首/末选项并触发
+>   同一 `change` 加载），方向键保持原生；② 切换学生请求开始即清空旧诊断 + 显示中文加载态、
+>   成功才渲染新数据、失败保持清空并显示错误（仅当前请求可结束 loading，旧 Abort 不覆盖）；
+>   ③ 图谱节点名称改深色置于圆外下方、圆内只放白色百分比；④ 「关于本模型」补固定均匀先验 /
+>   32 画像 / DAG 单调只用于造数 / guess,slip∈[.02,.35] / 独立 Bernoulli 噪声与小样本局限。
+> - 补回归测试：B6 增「失败后旧诊断清空」断言；新增 B8（切换先清空+加载，成功后再显示新数据）、
+>   B9（图谱节点名称深色在圆外、百分比白色在圆内）；runner 改为按 `viewport` 分组跑桌面/移动。
+> - `node --check static/app.js` 与 `node --check tests/browser_e2e.cjs` 均通过（沙箱内）。
+> - 外部编排重跑后**全绿**：Python `Ran 79 tests ... OK`（存
+>   `docs/validation/python-external-final.txt`）；前端 `15 通过 / 0 失败`（存
+>   `docs/validation/frontend-external-final.txt`），`EXIT_CODE=0`。
+> - 截图复查发现提示词 17 两处样式修正未真正生效，按提示词 18 最小修正：① 全体矩阵
+>   `<table>` 补 `id="all-students-table"`（此前仅 `data-testid`，`#all-students-table` CSS 全部无效）；
+>   ② 雷达每轴共用同一锚点 `lp=vertex(k,R+32)`，名称 `y=lp.y-5`、百分比 `y=lp.y+11`（相同 x、
+>   12/11px，text-anchor middle），保持 340 viewBox、R/cx/cy、valuePts 不变。
+> - `node --check static/app.js` 通过；最终截图与浏览器复核交由外部编排核验后，本阶段方可勾选通过。

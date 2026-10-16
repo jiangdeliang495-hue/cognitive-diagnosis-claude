@@ -12,7 +12,9 @@
 - `<meta name="viewport" content="width=device-width, initial-scale=1">`（移动端适配）。
 - 文档 `<title>` 含「认知诊断」。
 - `[data-testid="limitations"]` 元素含「合成」与「小样本」（明示合成小样本局限）。
-- `[data-testid="loading"]` 加载态，可见文本含「加载」。
+- `[data-testid="loading"]` 加载态，可见文本含「加载」。初始加载与切换学生时均显示；
+  切换学生时须**先清空当前诊断**（雷达/概率表/图谱）再显示加载，成功才渲染新数据，
+  失败保持清空并显示错误（不把旧学生数据当作当前显示）。
 - `[data-testid="error"]` 错误态，`role="alert"`，中文提示。
 - `[data-testid="retry"]` 重试 `<button>`，文本「重试」；点击后重发失败的请求。
 
@@ -22,7 +24,9 @@
 - 12 个 `<option>`：`value` = 学生 `id`（1..12），文本 = 学生 `name`（学生01..学生12）。
 - 默认选中第一个学生（`id=1`）。
 - 键盘可达：聚焦后有可见焦点指示（`outline` 或 `box-shadow` 非 `none`）；
-  `Home`/`End`/方向键可改变选中学生。
+  `Home`/`End`/方向键可改变选中学生。macOS Chromium 原生 `<select>` 不响应
+  `Home`/`End`，须显式 `keydown` 处理（设首/末选项并触发同一 `change` 加载），
+  方向键保持原生行为。
 
 ## 3. 当前学生
 
@@ -51,7 +55,8 @@
 
 - `<svg data-testid="knowledge-graph" role="img">`。
 - 5 节点：`[data-testid="graph-node" data-kp-id="1..5" data-value="原始概率"]`；
-  可见文本含知识点名与百分比（`%`）。
+  圆内放 `[data-testid="graph-node-value"]`（白色百分比），圆外下方放
+  `[data-testid="graph-node-name"]`（深色完整名称）；可见/可访问文本含知识点名与百分比（`%`）。
 - 5 有向边（前置→后续）：`[data-testid="graph-edge" data-parent="p" data-child="c"
   marker-end="url(#id)"]`，`marker-end` 必须引用 SVG 内**实际存在**的 `<marker>`（箭头）。
 - 节点/边集合与 `GET /api/graph` 一致（5 边：1→2、1→4、2→3、3→5、4→5）。

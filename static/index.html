@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>学生认知诊断 · 智能化认知诊断 MVP</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>学生认知诊断</h1>
+    <p data-testid="limitations" class="limitations">
+      合成小样本演示数据（12 名学生 × 24 道题），掌握概率为估计值，仅供演示说明。
+    </p>
+  </header>
+
+  <main class="app-main">
+    <div data-testid="loading" class="loading" role="status">加载中…</div>
+
+    <section class="card" aria-labelledby="control-title">
+      <h2 id="control-title" class="visually-hidden">选择学生</h2>
+      <label class="control-label" for="student-select">选择学生</label>
+      <div class="control-row">
+        <select id="student-select" data-testid="student-select"></select>
+        <span class="current" data-testid="current-student"></span>
+      </div>
+      <div data-testid="error" class="error" role="alert" hidden></div>
+      <button data-testid="retry" class="retry" type="button" hidden>重试</button>
+    </section>
+
+    <section class="card" aria-labelledby="radar-title">
+      <h2 id="radar-title">掌握概率雷达图</h2>
+      <div id="radar" class="chart"></div>
+    </section>
+
+    <section class="card" aria-labelledby="table-title">
+      <h2 id="table-title">知识点掌握概率</h2>
+      <div class="table-scroll">
+        <table data-testid="mastery-table">
+          <thead>
+            <tr>
+              <th scope="col">知识点</th>
+              <th scope="col">掌握概率</th>
+              <th scope="col">答对率（对照）</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="graph-title">
+      <h2 id="graph-title">前置知识图谱</h2>
+      <p class="hint">箭头表示学习顺序：前置 → 后续</p>
+      <div id="graph" class="chart"></div>
+    </section>
+
+    <section class="card" aria-labelledby="matrix-title">
+      <h2 id="matrix-title">全体学生掌握概率矩阵</h2>
+      <p class="hint">高亮行为当前学生；表格过宽时在容器内横向滚动</p>
+      <div class="matrix-scroll">
+        <table id="all-students-table" data-testid="all-students-table"></table>
+      </div>
+    </section>
+
+    <section class="card">
+      <details>
+        <summary>关于本模型</summary>
+        <p>
+          本界面用 DINA 认知诊断模型，从学生在 24 道题上的作答估计每名学生、
+          每个知识点的<strong>掌握概率</strong>（连续值，介于 0 到 1）。
+          它和「答对率」不同：答对率只统计做对的比例，而掌握概率会考虑题目的
+          猜测与粗心（失误）参数。因此表中「答对率」一列仅作<strong>对照</strong>，
+          不是掌握程度。
+        </p>
+        <p>
+          前置知识图谱只用来解释<strong>学习顺序</strong>（箭头从前置指向后续），
+          不改变任何估计结果。所有数据为<strong>合成小样本</strong>（12 人 × 24 题），
+          掌握概率是估计值而非确定判定，仅供演示。
+        </p>
+        <p>
+          模型采用<strong>固定均匀先验</strong>（5 个知识点共 2⁵=32 种掌握画像，先验各 1/32），
+          推断在这 32 种画像上做后验，不受造数约束。合成真值仅用于<strong>生成数据</strong>时沿
+          前置关系单调，不裁剪模型推断。题目猜测/粗心参数约束在 <strong>[0.02, 0.35]</strong>；
+          作答为<strong>独立 Bernoulli 噪声</strong>，属小样本合成演示，结果不可外推到真实课堂。
+        </p>
+      </details>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

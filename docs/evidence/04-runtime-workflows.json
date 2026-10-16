@@ -1,0 +1,29 @@
+{
+  "source": "Selected tool metadata only; no thinking, signatures or credentials",
+  "skills": [
+    {
+      "session": "384a7eca-d8ba-4db5-a492-d78a710fd0a1",
+      "timestamp": "2026-10-16T09:53:05.192Z",
+      "skill": "superpowers:brainstorming",
+      "is_error": false
+    },
+    {
+      "session": "384a7eca-d8ba-4db5-a492-d78a710fd0a1",
+      "timestamp": "2026-10-16T13:25:47.363Z",
+      "skill": "superpowers:test-driven-development",
+      "is_error": false
+    },
+    {
+      "session": "df08a1cc-fdd4-46d7-b44d-2acd70394f92",
+      "timestamp": "2026-10-16T13:46:59.174Z",
+      "skill": "superpowers:test-driven-development",
+      "is_error": false
+    },
+    {
+      "session": "622429f8-0931-4022-90d4-0ee9cee8d8c7",
+      "timestamp": "2026-10-16T14:39:48.837Z",
+      "skill": "superpowers:test-driven-development",
+      "is_error": false
+    }
+  ]
+}

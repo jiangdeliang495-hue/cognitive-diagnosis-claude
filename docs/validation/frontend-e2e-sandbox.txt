@@ -1,0 +1,28 @@
+前端浏览器 E2E —— 沙箱内尝试（预期受端口绑定限制）
+Command(seed): python3 -m src.seed /tmp/claude-501/cdiag-e2e2.db
+已生成数据库：/tmp/claude-501/cdiag-e2e2.db
+SEED_EXIT=0
+Command(server): python3 -m src.server /tmp/claude-501/cdiag-e2e2.db 8023 &
+(eval):10: nice(5) failed: operation not permitted
+SERVER_DIED（沙箱禁用本机端口绑定）
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/private/tmp/claude-homework-t2WpwB/src/server.py", line 331, in <module>
+    main()
+    ~~~~^^
+  File "/private/tmp/claude-homework-t2WpwB/src/server.py", line 320, in main
+    srv = make_server(args.db_path, host=args.host, port=args.port)
+  File "/private/tmp/claude-homework-t2WpwB/src/server.py", line 65, in make_server
+    return http.server.ThreadingHTTPServer((host, port), handler)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 457, in __init__
+    self.server_bind()
+    ~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 136, in server_bind
+    socketserver.TCPServer.server_bind(self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 478, in server_bind
+    self.socket.bind(self.server_address)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 1] Operation not permitted

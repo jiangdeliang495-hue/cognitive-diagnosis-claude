@@ -62,7 +62,7 @@ erDiagram
 |---|---|---|
 | `knowledge_point` | 5 个知识点 | `code` 唯一（KP1..KP5） |
 | `prerequisite` | 学习顺序边（DAG） | `(parent_id, child_id)` 主键；`parent≠child` |
-| `question` | 24 道合成题 | — |
+| `question` | 24 道合成题 | 24 条互不相同的简短中文**合成演示题干**（仅演示，不评分、不做答题）；单技能题不暗测其它知识点 |
 | `q_matrix` | Q 矩阵（题目 × 知识点） | `(question_id, kp_id)` 主键；每题 ≥1 项 `required=1` |
 | `student` | 12 名学生 | `profile_id ∈ [0,31]` 合成真值，仅生成/验证用 |
 | `x_matrix` | X 作答矩阵（学生 × 题目） | `(student_id, question_id)` 主键 |

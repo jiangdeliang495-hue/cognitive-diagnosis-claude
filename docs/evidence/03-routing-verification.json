@@ -1,0 +1,10 @@
+{
+  "source": "Locally exported Claude diagnostic report; managed configuration is secrets-redacted by the app",
+  "gateway_endpoint_found": true,
+  "compatibility_alias_found": true,
+  "display_label_found": true,
+  "effective_3p_mode": true,
+  "provider_gateway_ok": true,
+  "mapping_reference": "https://api-docs.deepseek.com/guides/anthropic_api/",
+  "interpretation": "The transcript model field is the compatibility alias. Routing plus the provider documented alias mapping supports the DeepSeek V4 Pro setup; a model self-identification is not provider verification."
+}

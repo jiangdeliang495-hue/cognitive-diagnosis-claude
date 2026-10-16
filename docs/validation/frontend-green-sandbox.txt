@@ -1,0 +1,42 @@
+前端 GREEN 阶段 —— 沙箱内 Python 全套测试（含新增题干测试）
+Command: python3 -m unittest discover -s tests -v
+E.........E...................................................
+======================================================================
+ERROR: setUpClass (test_api.ApiTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_api.py", line 58, in setUpClass
+    cls.srv = server.make_server(cls.db_path, host="127.0.0.1", port=0)
+              ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/server.py", line 65, in make_server
+    return http.server.ThreadingHTTPServer((host, port), handler)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 457, in __init__
+    self.server_bind()
+    ~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 136, in server_bind
+    socketserver.TCPServer.server_bind(self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 478, in server_bind
+    self.socket.bind(self.server_address)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_startup_and_serve_via_module (test_cli.ServerCliTests.test_startup_and_serve_via_module)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_cli.py", line 78, in test_startup_and_serve_via_module
+    s.bind(("127.0.0.1", 0))
+    ~~~~~~^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 1] Operation not permitted
+
+----------------------------------------------------------------------
+Ran 61 tests in 3.524s
+
+FAILED (errors=2)
+PYTEST_EXIT_CODE=1
+
+---- 语法检查 ----
+Command: node --check static/app.js && node --check tests/browser_e2e.cjs
+SYNTAX_OK

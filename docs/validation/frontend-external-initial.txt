@@ -1,0 +1,31 @@
+External orchestration: same Claude-authored browser test, temporary browser profile
+Command: E2E_BASE_URL=http://127.0.0.1:8765 node tests/browser_e2e.cjs
+Runtime: Node24.19.0 / Playwright1.62.1 / Chromium151.0.7922.34
+被测服务：http://127.0.0.1:8765
+
+── HTTP 静态 MIME / 编码 / 路径穿越 ──
+  ✔ 静态 / → text/html; charset=utf-8 且 UTF-8 含中文
+  ✔ 静态 /index.html /style.css /app.js 各返回正确 MIME+charset
+  ✔ 静态 /app.js 内容为 UTF-8 编码（无替换字符 U+FFFD）
+  ✔ 路径穿越（裸 / 编码 / 反斜杠）一律 404 且不泄漏源码或库内容
+  ✔ 未知静态路径 → 404 JSON（白名单路由，不落到文件系统）
+  ✔ /api/* 保持 application/json（静态 MIME 不误用于 API）
+
+── 浏览器 E2E（playwright）──
+  ✔ B1 首屏加载：标题、12 名学生(与 API 一致)、默认学生、label、viewport、小样本提示
+  ✔ B2 所选学生：掌握概率/答对率/雷达几何逐项等于 API，答对率标注「对照」
+  ✔ B3 切换学生生效；旧请求晚返回不覆盖新选择
+  ✔ B4 图谱：5 节点 5 箭头，与 /api/graph 一致，marker-end 引用存在的 marker
+  ✔ B5 全体 12×5 表 60 个唯一(student_id,kp_id)逐格等于 /api/diagnosis，不泄漏 profile_id
+  ✔ B6 加载态、网络失败显示中文错误与「重试」并可恢复
+  ✘ B7 390px 无横向溢出、5 节点完整可见、键盘选择学生 12、焦点可见
+      键盘 End 应选中学生 12
+
+──────────────────────────────
+结果：12 通过 / 1 失败（共 13 项）
+失败项：
+  - B7 390px 无横向溢出、5 节点完整可见、键盘选择学生 12、焦点可见
+    键盘 End 应选中学生 12
+EXIT_CODE=1
+
+PROCESS_EXIT_CODE=1

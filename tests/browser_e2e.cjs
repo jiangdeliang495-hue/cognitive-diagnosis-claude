@@ -527,7 +527,8 @@ function browserTests(baseURL) {
       assert.ok((await loading.innerText()).includes('加载'),
         '加载态应为中文「加载」');
       releaseList();
-      await page.locator('[data-testid="student-select"]').waitFor({ timeout: 10000 });
+      // 等首次加载真正完成（加载态隐藏 ⟹ 列表已填充、默认学生已渲染）
+      await page.locator('[data-testid="loading"]').waitFor({ state: 'hidden', timeout: 10000 });
       await page.unroute('**/api/students');
 
       // 模拟网络失败：切学生 3 时详情请求被中止（豁免该注入的 net::ERR_FAILED）。
@@ -540,6 +541,14 @@ function browserTests(baseURL) {
       assert.strictEqual(await error.getAttribute('role'), 'alert', '错误态缺少 role="alert"');
       assert.ok(/[一-鿿]/.test(await error.innerText()), '错误信息非中文');
       clearExpectFail(); // 已确认失败被消费，恢复 console.error 零容忍
+
+      // 失败后旧诊断已清空，不把旧学生数据当作当前显示（独立复核问题 1）
+      assert.strictEqual(await page.locator('[data-testid="radar-chart"]').count(), 0,
+        '失败后雷达图应清空，不得保留旧学生数据');
+      assert.strictEqual(await page.locator('[data-testid="mastery-row"]').count(), 0,
+        '失败后概率表应清空');
+      assert.strictEqual(await page.locator('[data-testid="graph-node"]').count(), 0,
+        '失败后图谱应清空');
 
       const retry = page.locator('[data-testid="retry"]');
       await retry.waitFor();
@@ -565,6 +574,7 @@ function browserTests(baseURL) {
   // B7 —— 手机布局（390px 无横向溢出、5 节点完整可见）+ 键盘选择与可见焦点
   tests.push({
     name: 'B7 390px 无横向溢出、5 节点完整可见、键盘选择学生 12、焦点可见',
+    viewport: 'mobile',
     run: async ({ page }) => {
       await page.goto(baseURL + '/', { waitUntil: 'domcontentloaded' });
       const select = page.locator('[data-testid="student-select"]');
@@ -606,9 +616,12 @@ function browserTests(baseURL) {
       assert.ok(focusStyle.outline !== 'none' || focusStyle.shadow !== 'none',
         'select 聚焦无可见焦点指示（outline 与 box-shadow 均为 none）');
 
-      // 键盘选择到学生 12，并等待其数值实际更新
-      await page.keyboard.press('End');
-      assert.strictEqual(await select.inputValue(), '12', '键盘 End 应选中学生 12');
+      // 键盘选择到学生 12：等待浏览器默认动作生效（值真正变为 12），再等数值更新
+      await select.press('End');
+      await page.waitForFunction(() => {
+        const s = document.querySelector('[data-testid="student-select"]');
+        return s && s.value === '12';
+      }, undefined, { timeout: 5000 });
       const d12 = await getJSON(baseURL, '/api/students/12');
       const mastery12 = d12.json.mastery.map((m) => m.prob);
       await page.waitForFunction((exp) => {
@@ -618,6 +631,72 @@ function browserTests(baseURL) {
         return dv.length === exp.length && dv.every((v, i) => Math.abs(v - exp[i]) < 1e-9);
       }, mastery12, { timeout: 5000 });
       await assertStudentShown(page, baseURL, 12);
+    },
+  });
+
+  // B8 —— 切换学生先清空旧诊断 + 显示加载，成功后显示新数据（独立复核问题 1）
+  tests.push({
+    name: 'B8 切换学生：先清空旧诊断并显示加载，成功后再显示新数据',
+    viewport: 'desktop',
+    run: async ({ page }) => {
+      await page.goto(baseURL + '/', { waitUntil: 'domcontentloaded' });
+      await waitForReady(page); // 学生 1 已加载
+
+      // 挂起学生 2 详情，观察切换中的清空与加载态
+      let release;
+      const gate = new Promise((r) => { release = r; });
+      await page.route('**/api/students/2', async (route) => {
+        await gate;
+        await route.continue();
+      });
+
+      await page.locator('[data-testid="student-select"]').selectOption('2');
+
+      await page.locator('[data-testid="loading"]').waitFor({ state: 'visible', timeout: 5000 });
+      assert.strictEqual(await page.locator('[data-testid="radar-chart"]').count(), 0,
+        '切换中雷达应清空，不得保留旧学生数据');
+      assert.strictEqual(await page.locator('[data-testid="mastery-row"]').count(), 0,
+        '切换中概率表应清空');
+      assert.strictEqual(await page.locator('[data-testid="graph-node"]').count(), 0,
+        '切换中图谱应清空');
+
+      release();
+      await page.locator('[data-testid="loading"]').waitFor({ state: 'hidden', timeout: 10000 });
+      await assertStudentShown(page, baseURL, 2);
+      await page.unroute('**/api/students/2');
+    },
+  });
+
+  // B9 —— 图谱节点名称深色置于圆外、百分比在圆内（长名可读，独立复核问题 2）
+  tests.push({
+    name: 'B9 图谱节点：名称深色在圆外、百分比在圆内（长名可读）',
+    viewport: 'desktop',
+    run: async ({ page }) => {
+      await page.goto(baseURL + '/', { waitUntil: 'domcontentloaded' });
+      await waitForReady(page);
+
+      const nodes = page.locator('[data-testid="graph-node"]');
+      assert.strictEqual(await nodes.count(), N_KP);
+      for (let i = 0; i < N_KP; i++) {
+        const node = nodes.nth(i);
+        const nameEl = node.locator('[data-testid="graph-node-name"]');
+        const valueEl = node.locator('[data-testid="graph-node-value"]');
+
+        const nameFill = (await nameEl.getAttribute('fill') || '').replace(/\s+/g, '').toLowerCase();
+        assert.ok(nameFill && !/^#(fff|ffffff)$/.test(nameFill),
+          `节点 ${i} 名称应为深色，实为 fill=${nameFill}`);
+        const valueFill = (await valueEl.getAttribute('fill') || '').replace(/\s+/g, '').toLowerCase();
+        assert.ok(/^#(fff|ffffff)$/.test(valueFill),
+          `节点 ${i} 百分比应为白色，实为 fill=${valueFill}`);
+
+        // 名称位于圆外下方（避免长名溢出圆在浅底不可读）
+        const nameY = parseFloat(await nameEl.getAttribute('y'));
+        const circle = node.locator('circle');
+        const cy = parseFloat(await circle.getAttribute('cy'));
+        const r = parseFloat(await circle.getAttribute('r'));
+        assert.ok(nameY > cy + r,
+          `节点 ${i} 名称应在圆下方（圆外），nameY=${nameY} cy+r=${cy + r}`);
+      }
     },
   });
 
@@ -696,36 +775,36 @@ async function main() {
       const { chromium } = require('playwright');
       browser = await chromium.launch({ headless: true });
       const bt = browserTests(baseURL);
+      const desktopTests = bt.filter((t) => (t.viewport || 'desktop') === 'desktop');
+      const mobileTests = bt.filter((t) => t.viewport === 'mobile');
 
-      // 桌面视口（B1–B6）
+      // 桌面视口
       const desktop = await browser.newContext({ viewport: { width: 1280, height: 800 } });
-      for (const t of bt.slice(0, 6)) {
+      for (const t of desktopTests) {
         const ctx = await newPage(desktop);
-        let shotTaken = false;
-        try {
-          const r = await runBrowserCase(t, ctx);
-          all.push(r);
-          if (!r.ok) { failed += 1; shotTaken = true; }
-        } finally {
-          if (shotTaken) {
-            const shot = path.join(screenshotDir, 'frontend-red-failure.png');
-            try {
-              fs.mkdirSync(screenshotDir, { recursive: true });
-              await ctx.page.screenshot({ path: shot, fullPage: true }).catch(() => {});
-            } catch { /* 截图失败不掩盖主错误 */ }
-          }
-          await ctx.close().catch(() => {});
+        const r = await runBrowserCase(t, ctx);
+        all.push(r);
+        if (!r.ok) {
+          failed += 1;
+          const shot = path.join(screenshotDir, 'frontend-red-failure.png');
+          try {
+            fs.mkdirSync(screenshotDir, { recursive: true });
+            await ctx.page.screenshot({ path: shot, fullPage: true }).catch(() => {});
+          } catch { /* 截图失败不掩盖主错误 */ }
         }
+        await ctx.close().catch(() => {});
       }
       await desktop.close().catch(() => {});
 
-      // 移动视口（B7，390px）
+      // 移动视口（390px）
       const mobile = await browser.newContext({ viewport: { width: 390, height: 844 } });
-      const ctx = await newPage(mobile);
-      const r = await runBrowserCase(bt[6], ctx);
-      all.push(r);
-      if (!r.ok) failed += 1;
-      await ctx.close().catch(() => {});
+      for (const t of mobileTests) {
+        const ctx = await newPage(mobile);
+        const r = await runBrowserCase(t, ctx);
+        all.push(r);
+        if (!r.ok) failed += 1;
+        await ctx.close().catch(() => {});
+      }
       await mobile.close().catch(() => {});
 
       await browser.close().catch(() => {});

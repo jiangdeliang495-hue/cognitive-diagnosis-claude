@@ -233,6 +233,31 @@ class SeedTests(unittest.TestCase):
         self.assertEqual(q_db, q)
         self.assertEqual(x_db, x)
 
+    def test_question_stems_distinct_descriptive_and_isolated(self):
+        # 24 条互不相同的简短中文合成题干，逐条对应冻结 Q。
+        # 单技能题不得暗测其它知识点：KP5 只考列式并给出算术结果；KP3 不要求自行通分。
+        seed.run(self.db_path)
+        conn = self._conn()
+        stems = [r[0] for r in conn.execute(
+            "SELECT stem FROM question ORDER BY id").fetchall()]
+        conn.close()
+
+        self.assertEqual(len(stems), N_ITEMS)
+        self.assertEqual(len(set(stems)), N_ITEMS, "题干必须 24 条互不相同")
+        for s in stems:
+            self.assertTrue(s and s == s.strip(), "题干不得为空或含首尾空白")
+            self.assertTrue(1 < len(s) <= 60, "题干应简短（≤60 字）：%r" % s)
+
+        # 单技能 KP5（Q5/Q10/Q15）：只考数量关系/列式并给出算术结果，不要求计算。
+        for idx in (4, 9, 14):
+            self.assertIn("列式", stems[idx])
+            self.assertIn("结果已给", stems[idx])
+            self.assertNotIn("计算", stems[idx])
+
+        # 单技能 KP3（Q3/Q8/Q13）：不得要求自行通分（避免暗测 KP2）。
+        for idx in (2, 7, 12):
+            self.assertNotIn("通分", stems[idx])
+
     def test_seed_prerequisites_match(self):
         seed.run(self.db_path)
         conn = self._conn()
