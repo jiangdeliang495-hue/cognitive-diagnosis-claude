@@ -1,0 +1,237 @@
+LLM 学习建议 —— 测试先行 RED（沙箱内可运行部分，四轮审查补强后）
+Command: python3 -m unittest tests.test_advice -v
+test_advice (unittest.loader._FailedTest.test_advice) ... ERROR
+
+======================================================================
+ERROR: test_advice (unittest.loader._FailedTest.test_advice)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_advice
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/loader.py", line 137, in loadTestsFromName
+    module = __import__(module_name)
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice.py", line 20, in <module>
+    from src import advice
+ImportError: cannot import name 'advice' from 'src' (/private/tmp/claude-homework-t2WpwB/src/__init__.py)
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+FAILED (errors=1)
+ADVICE_TEST_EXIT_CODE=1
+
+---- 全套回归（沙箱内，含新增 advice 测试的 RED）----
+Command: python3 -m unittest discover -s tests -v
+test_advice (unittest.loader._FailedTest.test_advice) ... ERROR
+setUpClass (test_advice_api.AdviceApiTests) ... ERROR
+test_prompt_reflects_modified_db_actual_rates_and_edges (test_advice_api.AdviceSnapshotIsolationTests.test_prompt_reflects_modified_db_actual_rates_and_edges) ... ERROR
+test_second_distinct_upstream_content_maps_verbatim (test_advice_api.AdviceSnapshotIsolationTests.test_second_distinct_upstream_content_maps_verbatim) ... ERROR
+test_status_and_advice_when_not_configured (test_advice_api.AdviceUnconfiguredTests.test_status_and_advice_when_not_configured) ... ERROR
+test_status_reads_env_key_when_llm_none (test_advice_api.AdviceUnconfiguredTests.test_status_reads_env_key_when_llm_none) ... ERROR
+test_status_unconfigured_when_env_empty (test_advice_api.AdviceUnconfiguredTests.test_status_unconfigured_when_env_empty) ... ERROR
+test_302_not_followed_and_bearer_not_forwarded (test_advice_api.DefaultTransportRedirectTests.test_302_not_followed_and_bearer_not_forwarded) ... ERROR
+setUpClass (test_api.ApiTests) ... ERROR
+test_protocol_version_http11 (test_api.HandlerProtocolTests.test_protocol_version_http11) ... ok
+test_valid_and_invalid_ids (test_api.StudentIdParsingTests.test_valid_and_invalid_ids) ... ok
+test_creates_db_via_module (test_cli.SeedCliTests.test_creates_db_via_module) ... ok
+test_creates_db_via_script (test_cli.SeedCliTests.test_creates_db_via_script) ... ok
+test_force_rebuilds (test_cli.SeedCliTests.test_force_rebuilds) ... ok
+test_help_via_module (test_cli.SeedCliTests.test_help_via_module) ... ok
+test_help_via_script (test_cli.SeedCliTests.test_help_via_script) ... ok
+test_help_via_module (test_cli.ServerCliTests.test_help_via_module) ... ok
+test_help_via_script (test_cli.ServerCliTests.test_help_via_script) ... ok
+test_startup_and_serve_via_module (test_cli.ServerCliTests.test_startup_and_serve_via_module) ... ERROR
+test_determinism_fit (test_dina.FitTests.test_determinism_fit) ... ok
+test_final_params_history_and_relik_consistent (test_dina.FitTests.test_final_params_history_and_relik_consistent) ... ok
+test_fit_posterior_marginal_matches_recomputed (test_dina.FitTests.test_fit_posterior_marginal_matches_recomputed) ... ok
+test_fixed_prior_only_uniform (test_dina.FitTests.test_fixed_prior_only_uniform) ... ok
+test_item_permutation_invariance_fit (test_dina.FitTests.test_item_permutation_invariance_fit) ... ok
+test_likelihood_non_decreasing (test_dina.FitTests.test_likelihood_non_decreasing) ... ok
+test_max_iter_exhaustion_not_converged (test_dina.FitTests.test_max_iter_exhaustion_not_converged) ... ok
+test_one_step_em_hand_calc (test_dina.FitTests.test_one_step_em_hand_calc) ... ok
+test_param_bounds (test_dina.FitTests.test_param_bounds) ... ok
+test_skill_permutation_invariance_fit (test_dina.FitTests.test_skill_permutation_invariance_fit) ... ok
+test_and_gate_multi_skill (test_dina.PosteriorProfileTests.test_and_gate_multi_skill) ... ok
+test_determinism_pure (test_dina.PosteriorProfileTests.test_determinism_pure) ... ok
+test_does_not_modify_inputs (test_dina.PosteriorProfileTests.test_does_not_modify_inputs) ... ok
+test_fixed_prior_default_uniform_and_respected (test_dina.PosteriorProfileTests.test_fixed_prior_default_uniform_and_respected) ... ok
+test_item_permutation_invariance_pure (test_dina.PosteriorProfileTests.test_item_permutation_invariance_pure) ... ok
+test_k1_single_item_hand_calc (test_dina.PosteriorProfileTests.test_k1_single_item_hand_calc) ... ok
+test_long_column_log_stability (test_dina.PosteriorProfileTests.test_long_column_log_stability) ... ok
+test_marginal_is_probability_not_map_profile (test_dina.PosteriorProfileTests.test_marginal_is_probability_not_map_profile) ... ok
+test_posterior_normalization (test_dina.PosteriorProfileTests.test_posterior_normalization) ... ok
+test_profile_bit_order_matches_q_columns (test_dina.PosteriorProfileTests.test_profile_bit_order_matches_q_columns) ... ok
+test_rejects_illegal_q_x_and_shapes (test_dina.PosteriorProfileTests.test_rejects_illegal_q_x_and_shapes) ... ok
+test_skill_permutation_invariance_pure (test_dina.PosteriorProfileTests.test_skill_permutation_invariance_pure) ... ok
+test_creates_all_tables (test_schema.SchemaCreationTests.test_creates_all_tables) ... ok
+test_foreign_keys_enforced (test_schema.SchemaCreationTests.test_foreign_keys_enforced) ... ok
+test_item_param_bounds (test_schema.SchemaCreationTests.test_item_param_bounds) ... ok
+test_prerequisite_no_self_loop (test_schema.SchemaCreationTests.test_prerequisite_no_self_loop) ... ok
+test_student_profile_bounds (test_schema.SchemaCreationTests.test_student_profile_bounds) ... ok
+test_x_matrix_binary (test_schema.SchemaCreationTests.test_x_matrix_binary) ... ok
+test_32_profiles_ideal_response_distinct (test_seed.DataGenTests.test_32_profiles_ideal_response_distinct) ... ok
+test_generation_deterministic (test_seed.DataGenTests.test_generation_deterministic) ... ok
+test_no_empty_requirement_question (test_seed.DataGenTests.test_no_empty_requirement_question) ... ok
+test_prerequisites_frozen_and_acyclic (test_seed.DataGenTests.test_prerequisites_frozen_and_acyclic) ... ok
+test_profiles_downward_closed_along_dag (test_seed.DataGenTests.test_profiles_downward_closed_along_dag) ... ok
+test_q_matrix_matches_frozen_contract (test_seed.DataGenTests.test_q_matrix_matches_frozen_contract) ... ok
+test_q_shape_and_binary (test_seed.DataGenTests.test_q_shape_and_binary) ... ok
+test_q_three_i5_plus_nine_composite (test_seed.DataGenTests.test_q_three_i5_plus_nine_composite) ... ok
+test_students_ids_and_names (test_seed.DataGenTests.test_students_ids_and_names) ... ok
+test_students_profiles_frozen (test_seed.DataGenTests.test_students_profiles_frozen) ... ok
+test_synthesized_item_params_in_bounds (test_seed.DataGenTests.test_synthesized_item_params_in_bounds) ... ok
+test_x_shape_and_binary (test_seed.DataGenTests.test_x_shape_and_binary) ... ok
+test_question_stems_distinct_descriptive_and_isolated (test_seed.SeedTests.test_question_stems_distinct_descriptive_and_isolated) ... ok
+test_seed_creates_expected_counts (test_seed.SeedTests.test_seed_creates_expected_counts) ... ok
+test_seed_deterministic (test_seed.SeedTests.test_seed_deterministic) ... /private/tmp/claude-homework-t2WpwB/tests/test_seed.py:355: ResourceWarning: unclosed <socket.socket fd=3, family=2, type=1, proto=0, laddr=('0.0.0.0', 0)>
+  out[t] = conn.execute("SELECT * FROM %s ORDER BY rowid" % t).fetchall()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_seed_diagnosis_60_sorted_and_matches_recomputed (test_seed.SeedTests.test_seed_diagnosis_60_sorted_and_matches_recomputed) ... ok
+test_seed_force_rebuilds (test_seed.SeedTests.test_seed_force_rebuilds) ... ok
+test_seed_item_params_in_bounds (test_seed.SeedTests.test_seed_item_params_in_bounds) ... ok
+test_seed_prerequisites_match (test_seed.SeedTests.test_seed_prerequisites_match) ... ok
+test_seed_q_x_match_generation (test_seed.SeedTests.test_seed_q_x_match_generation) ... ok
+test_seed_refit_matches_stored_params_and_diagnosis (test_seed.SeedTests.test_seed_refit_matches_stored_params_and_diagnosis) ... ok
+test_seed_refuses_overwrite (test_seed.SeedTests.test_seed_refuses_overwrite) ... ok
+test_seed_x_complete_288_records (test_seed.SeedTests.test_seed_x_complete_288_records) ... ok
+
+======================================================================
+ERROR: test_advice (unittest.loader._FailedTest.test_advice)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_advice
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/loader.py", line 396, in _find_test_path
+    module = self._get_module_from_name(name)
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/loader.py", line 339, in _get_module_from_name
+    __import__(name)
+    ~~~~~~~~~~^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice.py", line 20, in <module>
+    from src import advice
+ImportError: cannot import name 'advice' from 'src' (/private/tmp/claude-homework-t2WpwB/src/__init__.py)
+
+
+======================================================================
+ERROR: setUpClass (test_advice_api.AdviceApiTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 134, in setUpClass
+    cls.srv = server.make_server(
+              ~~~~~~~~~~~~~~~~~~^
+        cls.db_path, host="127.0.0.1", port=0,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        llm={"key": TEST_KEY, "transport": cls.transport})
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: make_server() got an unexpected keyword argument 'llm'
+
+======================================================================
+ERROR: test_prompt_reflects_modified_db_actual_rates_and_edges (test_advice_api.AdviceSnapshotIsolationTests.test_prompt_reflects_modified_db_actual_rates_and_edges)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 682, in test_prompt_reflects_modified_db_actual_rates_and_edges
+    status, raw = self._post(transport)
+                  ~~~~~~~~~~^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 662, in _post
+    srv = server.make_server(
+        self.db_path, host="127.0.0.1", port=0,
+        llm={"key": TEST_KEY, "transport": transport})
+TypeError: make_server() got an unexpected keyword argument 'llm'
+
+======================================================================
+ERROR: test_second_distinct_upstream_content_maps_verbatim (test_advice_api.AdviceSnapshotIsolationTests.test_second_distinct_upstream_content_maps_verbatim)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 710, in test_second_distinct_upstream_content_maps_verbatim
+    status, raw = self._post(transport)
+                  ~~~~~~~~~~^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 662, in _post
+    srv = server.make_server(
+        self.db_path, host="127.0.0.1", port=0,
+        llm={"key": TEST_KEY, "transport": transport})
+TypeError: make_server() got an unexpected keyword argument 'llm'
+
+======================================================================
+ERROR: test_status_and_advice_when_not_configured (test_advice_api.AdviceUnconfiguredTests.test_status_and_advice_when_not_configured)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 608, in test_status_and_advice_when_not_configured
+    srv = self._serve({"key": None})
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 592, in _serve
+    srv = server.make_server(self.db_path, host="127.0.0.1", port=0, llm=llm)
+TypeError: make_server() got an unexpected keyword argument 'llm'
+
+======================================================================
+ERROR: test_status_reads_env_key_when_llm_none (test_advice_api.AdviceUnconfiguredTests.test_status_reads_env_key_when_llm_none)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 626, in test_status_reads_env_key_when_llm_none
+    srv = self._serve(None)
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 592, in _serve
+    srv = server.make_server(self.db_path, host="127.0.0.1", port=0, llm=llm)
+TypeError: make_server() got an unexpected keyword argument 'llm'
+
+======================================================================
+ERROR: test_status_unconfigured_when_env_empty (test_advice_api.AdviceUnconfiguredTests.test_status_unconfigured_when_env_empty)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 636, in test_status_unconfigured_when_env_empty
+    srv = self._serve(None)
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 592, in _serve
+    srv = server.make_server(self.db_path, host="127.0.0.1", port=0, llm=llm)
+TypeError: make_server() got an unexpected keyword argument 'llm'
+
+======================================================================
+ERROR: test_302_not_followed_and_bearer_not_forwarded (test_advice_api.DefaultTransportRedirectTests.test_302_not_followed_and_bearer_not_forwarded)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 742, in test_302_not_followed_and_bearer_not_forwarded
+    from src import advice  # 懒导入：保持模块级 RED 粒度（advice 尚未实现）
+    ^^^^^^^^^^^^^^^^^^^^^^
+ImportError: cannot import name 'advice' from 'src' (/private/tmp/claude-homework-t2WpwB/src/__init__.py)
+
+======================================================================
+ERROR: setUpClass (test_api.ApiTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_api.py", line 58, in setUpClass
+    cls.srv = server.make_server(cls.db_path, host="127.0.0.1", port=0)
+              ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/server.py", line 65, in make_server
+    return http.server.ThreadingHTTPServer((host, port), handler)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 457, in __init__
+    self.server_bind()
+    ~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 136, in server_bind
+    socketserver.TCPServer.server_bind(self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 478, in server_bind
+    self.socket.bind(self.server_address)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_startup_and_serve_via_module (test_cli.ServerCliTests.test_startup_and_serve_via_module)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_cli.py", line 78, in test_startup_and_serve_via_module
+    s.bind(("127.0.0.1", 0))
+    ~~~~~~^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 1] Operation not permitted
+
+----------------------------------------------------------------------
+Ran 68 tests in 4.510s
+
+FAILED (errors=10)
+FULL_EXIT_CODE=1
+
+---- 语法/编译检查 ----
+Command: node --check tests/advice_e2e.cjs
+advice_e2e.cjs SYNTAX_OK
+Command: python3 -m py_compile tests/test_advice.py tests/test_advice_api.py
+PY COMPILE OK
+
+说明：10 个错误中 8 个来自待实现功能（src/advice 缺失、make_server 尚无 llm 参数、
+真实 302 行为测试懒导入 advice），2 个为沙箱 socket.bind EPERM（test_api/test_cli，历史既有，
+非业务 RED）；其余 58 项全部通过。HTTP/浏览器 RED 受沙箱限制，由 Codex 在沙箱外运行同一
+测试并回填真实输出；Codex 已记录初始外部 RED（advice-red-external-initial.txt，85 tests/7 errors）。

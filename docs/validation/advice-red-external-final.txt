@@ -1,0 +1,111 @@
+External final advice RED contract execution.
+Command: python3 -m unittest discover -s tests -p test_advice*.py -v
+The feature implementation does not yet exist; missing-module/signature failures are expected.
+test_advice (unittest.loader._FailedTest.test_advice) ... ERROR
+setUpClass (test_advice_api.AdviceApiTests) ... ERROR
+test_prompt_reflects_modified_db_actual_rates_and_edges (test_advice_api.AdviceSnapshotIsolationTests.test_prompt_reflects_modified_db_actual_rates_and_edges) ... ERROR
+test_second_distinct_upstream_content_maps_verbatim (test_advice_api.AdviceSnapshotIsolationTests.test_second_distinct_upstream_content_maps_verbatim) ... ERROR
+test_status_and_advice_when_not_configured (test_advice_api.AdviceUnconfiguredTests.test_status_and_advice_when_not_configured) ... ERROR
+test_status_reads_env_key_when_llm_none (test_advice_api.AdviceUnconfiguredTests.test_status_reads_env_key_when_llm_none) ... ERROR
+test_status_unconfigured_when_env_empty (test_advice_api.AdviceUnconfiguredTests.test_status_unconfigured_when_env_empty) ... ERROR
+test_302_not_followed_and_bearer_not_forwarded (test_advice_api.DefaultTransportRedirectTests.test_302_not_followed_and_bearer_not_forwarded) ... ERROR
+
+======================================================================
+ERROR: test_advice (unittest.loader._FailedTest.test_advice)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_advice
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/loader.py", line 396, in _find_test_path
+    module = self._get_module_from_name(name)
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/loader.py", line 339, in _get_module_from_name
+    __import__(name)
+    ~~~~~~~~~~^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice.py", line 20, in <module>
+    from src import advice
+ImportError: cannot import name 'advice' from 'src' (/private/tmp/claude-homework-t2WpwB/src/__init__.py)
+
+
+======================================================================
+ERROR: setUpClass (test_advice_api.AdviceApiTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 134, in setUpClass
+    cls.srv = server.make_server(
+              ~~~~~~~~~~~~~~~~~~^
+        cls.db_path, host="127.0.0.1", port=0,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        llm={"key": TEST_KEY, "transport": cls.transport})
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: make_server() got an unexpected keyword argument 'llm'
+
+======================================================================
+ERROR: test_prompt_reflects_modified_db_actual_rates_and_edges (test_advice_api.AdviceSnapshotIsolationTests.test_prompt_reflects_modified_db_actual_rates_and_edges)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 682, in test_prompt_reflects_modified_db_actual_rates_and_edges
+    status, raw = self._post(transport)
+                  ~~~~~~~~~~^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 662, in _post
+    srv = server.make_server(
+        self.db_path, host="127.0.0.1", port=0,
+        llm={"key": TEST_KEY, "transport": transport})
+TypeError: make_server() got an unexpected keyword argument 'llm'
+
+======================================================================
+ERROR: test_second_distinct_upstream_content_maps_verbatim (test_advice_api.AdviceSnapshotIsolationTests.test_second_distinct_upstream_content_maps_verbatim)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 710, in test_second_distinct_upstream_content_maps_verbatim
+    status, raw = self._post(transport)
+                  ~~~~~~~~~~^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 662, in _post
+    srv = server.make_server(
+        self.db_path, host="127.0.0.1", port=0,
+        llm={"key": TEST_KEY, "transport": transport})
+TypeError: make_server() got an unexpected keyword argument 'llm'
+
+======================================================================
+ERROR: test_status_and_advice_when_not_configured (test_advice_api.AdviceUnconfiguredTests.test_status_and_advice_when_not_configured)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 608, in test_status_and_advice_when_not_configured
+    srv = self._serve({"key": None})
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 592, in _serve
+    srv = server.make_server(self.db_path, host="127.0.0.1", port=0, llm=llm)
+TypeError: make_server() got an unexpected keyword argument 'llm'
+
+======================================================================
+ERROR: test_status_reads_env_key_when_llm_none (test_advice_api.AdviceUnconfiguredTests.test_status_reads_env_key_when_llm_none)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 626, in test_status_reads_env_key_when_llm_none
+    srv = self._serve(None)
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 592, in _serve
+    srv = server.make_server(self.db_path, host="127.0.0.1", port=0, llm=llm)
+TypeError: make_server() got an unexpected keyword argument 'llm'
+
+======================================================================
+ERROR: test_status_unconfigured_when_env_empty (test_advice_api.AdviceUnconfiguredTests.test_status_unconfigured_when_env_empty)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 636, in test_status_unconfigured_when_env_empty
+    srv = self._serve(None)
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 592, in _serve
+    srv = server.make_server(self.db_path, host="127.0.0.1", port=0, llm=llm)
+TypeError: make_server() got an unexpected keyword argument 'llm'
+
+======================================================================
+ERROR: test_302_not_followed_and_bearer_not_forwarded (test_advice_api.DefaultTransportRedirectTests.test_302_not_followed_and_bearer_not_forwarded)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 742, in test_302_not_followed_and_bearer_not_forwarded
+    from src import advice  # 懒导入：保持模块级 RED 粒度（advice 尚未实现）
+    ^^^^^^^^^^^^^^^^^^^^^^
+ImportError: cannot import name 'advice' from 'src' (/private/tmp/claude-homework-t2WpwB/src/__init__.py)
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.434s
+
+FAILED (errors=8)
+
+PROCESS_EXIT_CODE=1

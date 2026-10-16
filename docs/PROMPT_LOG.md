@@ -292,6 +292,73 @@
 
 说明：用户纠正要求仓库**公开**以便提交；Codex 已将仓库可见性改为公开。本会话仅把发布元数据（README、SUBMISSION_DRAFT、本日志）同步为公开状态；提示词 22 及其它历史原文中「私有」表述按当时事实保留；未改业务代码/测试/PDF，未操作 Git/GitHub，未读凭据，未编造邮件发送。
 
+### 提示词 24（加分项「LLM 学习建议」：SDD 契约 + RED 测试，全文）
+
+> 用户要求把加分项"利用LLM根据诊断结果生成个性化学习建议"完整做完，并继续保持最高思考。你当前Claude Code必须保持Max；运行时DeepSeek建议也默认最高reasoning_effort=max。本地临时项目 /private/tmp/claude-homework-t2WpwB 已由Codex逐文件核对并对齐真实公开Git基线8b45164；原79项Python与15组前端均曾外部通过。后续源码/测试/文档仍由你生成，Git提交、外部socket/浏览器验收和最终推送由Codex编排，不在沙箱伪称通过。
+> 先真实调用已启用的Superpowers test-driven-development工作流。本轮只做SDD契约和RED测试，不实现src/static；完成后停止，等独立审查与实际RED记录后再实现。不要反复问用户设计选择，按下列已确认方案写文档和有意义的失败测试。
+> 锁定功能：
+> 1. 页面新增"AI学习建议"区，只有当前学生详情加载成功且用户点击"生成学习建议"才发POST；首屏/切学生/刷新不自动计费，不自动重试。独立loading/error/retry，避免影响已有诊断；生成中禁用防连点。切学生立即清空建议并abort旧等待，响应检查学生ID+请求序号，绝不把旧学生建议显示给新学生。模型输出全部textContent/DOM安全渲染，不能innerHTML。失败可手动重试；真实配置缺失明确提示，绝不伪造规则建议为LLM成功。
+> 2. GET /api/llm/status 只返回configured/provider/model/reasoning_effort等非敏感状态。唯一付费接口 POST /api/students/{id}/advice，JSON请求体严格{}；浏览器不能提交概率/prompt/key/model/baseURL。服务端按ID重新读取当前学生的已存DINA掌握概率、独立答对率、5知识点与前置边，关闭只读SQLite连接后再调用。绝不读取profile_id/其他学生资料，也不重跑EM或改数据库。核心6个GET仍无外网、不需要密钥。
+> 3. 仅从服务端环境DEEPSEEK_API_KEY读取运行时密钥，缺失503 LLM_NOT_CONFIGURED，密钥不进浏览器/HTML/JSON/日志/仓库。严禁读取Claude配置、Keychain、旧剪贴板或任何已有密钥。追加src.server的--prompt-key选项（标准库getpass隐藏输入；仅进当前进程环境，不存盘），方便用户在本机私下配置。原CLI调用和原79测试保持兼容。
+> 4. DeepSeek官方已核实：固定HTTPS地址 https://api.deepseek.com/chat/completions；真实model=deepseek-v4-pro；Bearer认证；thinking={type:enabled}、reasoning_effort=max；response_format={type:json_object}；stream=false；max_tokens=8192以给最高思考保留预算。不要设置temperature假称控制思考。只使用最终choices[0].message.content，不返回reasoning_content。请求/响应字节有上限，网络有明确超时，不自动重试。注意urlopen(timeout)只是socket空闲超时，不要冒称绝对总deadline；若实现120秒整体响应截止须真的有测试和不会堆积失控线程的设计。固定供应商地址并禁止重定向，防Authorization被转发。
+> 5. Prompt要求中文，掌握概率是模型估计且与答对率区分，考虑薄弱知识和前置关系，给具体练习动作与检查方法，不编造学生经历/测验结果，说明合成小样本局限。结构化advice={summary:string, priorities:[{kp_id:int,reason:string,actions:[string],check:string}]}；1~3项不同且存在的kp_id，行动1~3条，文本有长度/类型/非空限制。JSON mode不替代应用校验；空content/截断finish_reason/畸形或超长JSON/未知或重复技能ID必须拒绝。最终响应由服务器封装student_id,source=llm,provider=deepseek,model,reasoning_effort=max,advice（有实际request id/usage可脱敏保留）。
+> 6. 路由先精确匹配advice，避免被学生详情的宽泛前缀误判。非法ID400/不存在404；advice非POST以及原GET的POST仍405；只接受小体积application/json、拒绝chunked/重复或歧义Content-Length/非{}请求体；异源Origin、Origin:null、不可信Host拒绝且不调用供应商，无宽泛CORS；无Origin的本机JSON客户端允许。并发付费请求限制，忙/上游429返回可手动重试状态。供应商401/402/5xx、URLError、timeout、损坏/超长响应均有明确中文错误及合适HTTP码，不能回显上游body/异常repr/key。
+> 本轮交付：docs/LLM_SUGGESTIONS.md写冻结契约、模块接口和实现计划，更新API契约以容纳新接口但不声称已完成；tests/test_advice.py(纯逻辑+mock transport)、tests/test_advice_api.py(mock供应商真实本机HTTP)、tests/advice_e2e.cjs(mock路由的交互契约)。测试要验证具体学生快照、两学生prompt不同、无真值/其他学生/密钥泄漏；不合法请求零外网调用；各类上游失败与结构校验；DB前后不变；新UI成功/失败/缺配置/防双击/防学生竞态/XSS/390px/键盘。真实付费API验收单独进行，mock不算真实DeepSeek调用。源码尚未实现时运行能运行的RED，HTTP/浏览器受沙箱限制如实列出外部命令。记录本次Prompt全文、意图和Superpowers真实调用，不读凭据、不操作Git/推送/邮件。完成后等待审查，不提前写实现。
+
+说明：批准加分项「LLM 学习建议」并锁定完整方案（UI 计费时机/防竞态/XSS、GET /api/llm/status 与唯一付费 POST /api/students/{id}/advice、仅环境 DEEPSEEK_API_KEY + --prompt-key、DeepSeek 官方参数锁定与安全边界、中文提示词与结构化 advice 校验、路由/Origin/Host/并发/错误映射）。本轮只做 SDD 契约与 RED 测试（docs/LLM_SUGGESTIONS.md + API_CONTRACT 增补 + tests/test_advice.py / test_advice_api.py / tests/advice_e2e.cjs），不实现 src/static，完成后停等审查。本轮已通过 Skill 工具**真实调用 superpowers:test-driven-development**（返回已加载、指令不变）。
+
+### 提示词 25（独立审查第一轮：RED 测试自身缺陷纠偏，全文）
+
+> 独立审查已读新SDD和RED测试，以下必须在实现前修正。仍保持Max、本轮仍只改契约/测试，不提前写实现；在PROMPT_LOG如实记录本次纠偏。
+> 1. test_advice_api.py的共享transport.calls必须每个测试独立reset/新建，或使用每次调用数增量和本测试切片。unittest默认按字母排序，先前测试会污染后续success/status/prompt_differs的绝对次数断言；不能把错误测试当成正确RED。
+> 2. 当前deadline测试只证明monotonic()+120传入自定义mock；忽略deadline、默认transport无限read()的伪实现仍可通过。请在契约暴露默认transport可测试接口，并写默认网络层行为测试：受控分块/保活空行+假时钟让整体deadline真实超期，验证中断且关闭响应资源；socket空闲timeout不能代替总截止。设计可选择单个受控读取线程/限流门禁，但不能无界线程堆积或声称未测的截止保证。覆盖真实urllib HTTPError、http.client.HTTPException/IncompleteRead等损坏响应，确保脱敏。
+> 3. 禁重定向不能以“opener.handlers中完全没有HTTPRedirectHandler类型”当契约。正确的NoRedirect(HTTPRedirectHandler)子类也会被这种实现细节断言误杀。请改成行为测试：模拟302 Location到异源，断言没有第二次请求、更不转发Authorization，并返回安全的上游错误。
+> 4. 区分客户端请求体上限（{}，4KiB足够）与供应商完整prompt JSON上限（中文诊断+系统约束可能超过4KiB，建议16KiB），不要混用MAX_REQUEST_BYTES误拒正常生成。边界须在文档与测试保持一致。
+> 完成全部原定RED文件后，实际运行能够执行的单元测试；不要将socket沙箱失败算为正确RED，不要编造测试通过。完成后停止等待外部RED记录和复核，不实现src/static。
+
+说明：独立审查第一轮纠偏——① test_advice_api 共享 transport.calls 按测试清零防字母序污染；② 契约暴露 default_transport 可测试接口并补默认网络层行为测试（假时钟+受控分块让整体 120s 截止真实超期、中断并关闭响应、socket 空闲超时仅作轮询粒度、单线程循环无线程堆积、真实 urllib HTTPError 与 HTTPException/IncompleteRead 损坏响应脱敏）；③ 禁重定向改为行为测试（302 异源 Location 不二次请求、不转发 Authorization、安全错误），删去 opener handler 类型内省；④ 区分 MAX_REQUEST_BYTES=4KiB（客户端 {}）与 MAX_PROMPT_BYTES=16KiB（供应商完整 JSON）。
+
+### 提示词 26（独立审查第二轮：后端正例/框架字节与前端时序补强，全文）
+
+> 补充独立审查反馈，仍保持Max、仍只强化RED测试/契约，不提前实现。请与上一条纠偏一起处理并记录真实Prompt。
+> 后端必要补强：
+> 1. 必须有带正确同源Origin（包含实际测试端口）的成功POST正例；否则“拒绝所有Origin”的伪实现也会全绿，浏览器反而不能用。再测同hostname异端口、恶意后缀域名拒绝且零供应商调用。
+> 2. raw framing已有chunked/重复同值CL，再补冲突CL与TE+CL；Host使用真实绑定端口，避免被Host拒绝掩盖framing检查。
+> 3. 完整build_prompt→build_request验证正常中文诊断能通过provider16KiB限制。第二份内容不同的合法上游响应必须原样映射到规范化advice，防硬编码fixture；独立临时库修改诊断后核对新prompt，校验实际答对率/前置边，而非只含KP名字。不要污染其它测试。
+> 4. 补空/错类型choices、message、content；仅finish_reason=stop成功；布尔型kp_id拒绝；模型JSON未知字段明确剥离或拒绝，不能原样带出。
+> 前端tests/advice_e2e.cjs必要修正：
+> 5. C4故意mock HTTP502时Chromium会产生预期的资源console.error，不能把它当实现失败。仅豁免该测试明确注入的URL/status，仍保留所有pageerror与非预期console.error检查。
+> 6. C2点击后立即断言posts.length有异步route竞态，须等待精确请求被捕获，再断言只一次。C3先确认学生1请求已进入挂起gate，才切学生2；用可控的响应/渲染条件断言，不用随意sleep200ms冒充竞态已测。
+> 完成原定全部RED后停止等待实际外部RED运行和审查；不要把测试自身缺陷或环境socket权限失败当成业务正确RED。
+
+说明：独立审查第二轮补强——① 同源 Origin（含实际端口）成功正例 + 同 hostname 异端口/恶意后缀域名拒绝且零供应商调用；② raw framing 补冲突 CL 与 TE+CL，Host 用真实绑定端口；③ 完整 build_prompt→build_request 通过 16KiB 上限、第二份不同合法上游内容原样映射（防硬编码 fixture）、独立临时库改 diagnosis 后核对真实新值/实际答对率/5 条前置边（不污染其它测试）；④ 空/错类型 choices/message/content、仅 finish_reason=stop、布尔 kp_id 拒绝、未知字段剥离；⑤ C4 预期 502 console.error 仅按注入 URL/status 豁免；⑥ C2 等待精确捕获后断言、C3 先确认进入挂起 gate 再切学生、不用随意 sleep 冒充竞态已测。
+
+### 提示词 27（独立审查第三轮：前端 RED 最后一组补强，全文）
+
+> 前端RED最后一组独立审查补强，请在实现前并入测试，保持Max且仍不实现业务：
+> 1. C2要核对真实POST方法、JSON Content-Type和请求体{}，等预期summary/reason/actions/check文本实际出现；各文本字段都注入字面HTML并验证不会执行。
+> 2. C3增加A→B→A且最早A最后返回的可控竞态，区分同学生ID的旧请求；用明确gate信号，不用固定sleep作为完成判据。
+> 3. C4统计请求：失败后只有一次、点击手动重试才恰好第二次；未配置C5验证不可见而非必须DOM节点不存在，允许隐藏空容器。补未配置→配置状态改true后刷新→仅手动一次生成。
+> 4. C6用真实Tab/Enter或Space触发按钮，不能focus后鼠标click冒充键盘验收；390px加合法长度的连续英文长词检查换行。
+> 5. 默认mock掉所有付费POST，遗漏的POST直接abort并判失败，避免测试意外打真实API。继续严格检查pageerror，只对明确注入的失败URL/status豁免预期资源console.error。
+> 记录本次Prompt；本轮只完善契约与RED，完成后停止等待Codex实际外部RED及审查，不提前实现。
+
+说明：独立审查第三轮（前端 RED 最后一组）——① C2 核对真实 POST 方法/JSON Content-Type/严格 {}，等 summary/reason/actions/check 文本实际出现，各字段注入字面 HTML 并验证不执行；② C3 增 A→B→A 且最早 A 最后返回的同学生 ID 旧请求竞态，用明确 gate 信号；③ C4 失败恰好一次、手动重试恰好第二次，C5 以可见性（允许隐藏空容器）断言并补「未配置→已配置→刷新→仅手动一次生成」；④ C6 真实 Tab 遍历 + Space/Enter 键盘激活，390px 合法长度连续英文长词换行检查；⑤ 兜底 mock 所有付费 POST，漏网即 abort 并判失败防真实 API，pageerror 严格、仅豁免明确注入 URL/status 的预期 console.error。
+
+### 提示词 28（余额补足 + 网络 RED 契约最后一轮纠偏，全文）
+
+> 用户已补足Claude当前DeepSeek账户余额，明确要求继续Max开发。刚才两次402是真实阻塞，须如实记入Prompt日志，不伪造已完成。请从上次未完成的RED契约/测试修正继续，全部此前审查反馈保留，不重头设计。Codex已实际外部运行初始RED，记录docs/validation/advice-red-external-initial.txt：85 tests，7 errors（含setUpClass/import/尚未实现的llm参数），只是初始失败记录，不是最终契约验收。仍只完成测试/文档，不实现src/static，完成后停止等待Codex提交RED阶段再发实现指令。
+> 未处理的最后一次反馈全文如下：
+> 最后聚焦网络RED契约，修完即停止等外部RED，不再扩大范围、不实现业务，保持Max：
+> 1. DefaultTransportTests多处deadline=9999.0却没注入假clock，真实monotonic可能早已超过9999，正确实现会误超时。统一用受控clock或time.monotonic()+余量，确保测试自身有效。
+> 2. 不能用HTTPResponse.read(n)模拟真实保活：它内部可能连续多次底层读，持续空行可让一次调用跨越deadline。默认传输与fake响应应明确使用read1/单次有界读取，并在块之间检查monotonic，测试fake.read()可直接报错以防退回无限聚合读取。
+> 3. socket.timeout后真实HTTPResponse缓冲对象可能已不可继续读，不应把它当安全轮询而catch后继续。socket空闲超时应立即安全关闭并返回TIMEOUT；用正常read1分块+假clock单独测读取截止。
+> 4. 为避免过度承诺，文档如实限定120s为“响应读取截止检查”，连接/代理/TLS阶段受socket超时约束，不声称整次请求严格120s墙钟上限；保持单读取线程、无额外失控线程。这是澄清契约，不需要复杂后台线程体系。
+> 5. 当前302测试给FakeOpener直接抛HTTPError，仍不能证明真实build_opener禁跳转。请在test_advice_api.py用仅本地临时HTTP服务器返回302、独立目标记录请求，实际调用build_opener().open，断言302未跟随、目标零调用且假Bearer未转发。纯单元fake异常映射测试可保留。受沙箱socket限制时如实等待外部执行，不能声称已在沙箱跑通。
+> 记录本次纠偏后完成全部RED文件并停止；所有实现仍等下一轮授权。
+
+说明：告知两次 402 为真实余额阻塞（如实记录，不伪造已完成），余额已补足并继续 Max；Codex 已外部运行初始 RED（`docs/validation/advice-red-external-initial.txt`：85 tests、7 errors，仅初始失败记录）。网络 RED 契约最后一轮纠偏——① 所有 default_transport 测试注入受控时钟（真实 monotonic 可能超 9999，测试自身不得误超时）；② 传输改用 read1 单次有界读取、块之间检查时钟，fake.read() 直接报错防退回聚合读取；③ socket.timeout 立即关闭并 TIMEOUT（不 catch 后轮询），读取截止用正常 read1 分块 + 假时钟单独测；④ 120s 如实限定为「响应读取截止检查」，连接/代理/TLS 只受 socket 超时约束；⑤ 新增本地 302 服务器 + 独立目标服务器的真实 build_opener 行为测试（外部执行，沙箱不声称跑通）。
+
 ### 环境核验（阶段 0，真实命令结果）
 
 - `pwd` → `/private/tmp/claude-homework-t2WpwB`（与要求一致）
@@ -424,3 +491,48 @@
 >   ② 雷达每轴共用同一锚点 `lp=vertex(k,R+32)`，名称 `y=lp.y-5`、百分比 `y=lp.y+11`（相同 x、
 >   12/11px，text-anchor middle），保持 340 viewBox、R/cx/cy、valuePts 不变。
 > - `node --check static/app.js` 通过；最终截图与浏览器复核交由外部编排核验后，本阶段方可勾选通过。
+
+## 阶段 7：LLM 学习建议（加分项）—— SDD 契约 + RED（进行中，实现未开始）
+
+> 产物：`docs/LLM_SUGGESTIONS.md`（冻结契约/模块接口/实现计划）、`docs/API_CONTRACT.md` §8
+> （新接口契约，标注实现未开始）、`tests/test_advice.py`（纯逻辑 + mock transport）、
+> `tests/test_advice_api.py`（mock 供应商 + 真实本机 HTTP）、`tests/advice_e2e.cjs`
+> （mock 路由 UI 交互契约）。
+>
+> 真实命令与结果：
+> - 本轮通过 Skill 工具**真实调用 `superpowers:test-driven-development`**（返回已加载）。
+> - 独立审查三轮纠偏（提示词 25/26/27）已全部并入契约与 RED：共享 transport 调用清零、
+>   default_transport 可测试接口与假时钟整体截止/损坏响应/资源关闭行为测试、302 行为测试（不二次
+>   请求/不转发 Authorization）、MAX_REQUEST_BYTES=4KiB 与 MAX_PROMPT_BYTES=16KiB 分离、同源 Origin
+>   成功正例与恶意后缀拒绝、冲突 CL/TE+CL raw framing、独立临时库改 diagnosis 核对真实新值/实际
+>   答对率/前置边、第二份合法内容原样映射、布尔 kp_id/未知字段剥离/仅 finish_reason=stop、
+>   E2E 兜底安全网/预期 502 豁免/确定 gate 时序/A→B→A 竞态/真实 Tab+Space 键盘/长英文换行。
+> - `python3 -m unittest tests.test_advice -v` → `ImportError: cannot import name 'advice'`，
+>   `EXIT_CODE=1`；`python3 -m unittest discover -s tests -v` → `Ran 67 tests ... FAILED (errors=9)`，
+>   `EXIT_CODE=1`。9 个错误中 7 个来自待实现功能（test_advice 模块缺失、`make_server` 尚无 `llm`
+>   注入参数的 TypeError），另 2 个为沙箱 `socket.bind` EPERM（test_api/test_cli，历史既有）；
+>   其余 58 项全部通过（原 79 项外部绿色基线不受影响）。原始输出存 `docs/validation/advice-red.txt`。
+> - `node --check tests/advice_e2e.cjs` → 语法通过（SYNTAX_OK）。
+> - HTTP/浏览器受沙箱限制，RED 与后续验收的外部命令（由 Codex 编排）：
+>   ```
+>   python3 -m unittest tests.test_advice_api -v
+>   python3 -m src.seed /tmp/cdiag-e2e.db && python3 -m src.server /tmp/cdiag-e2e.db 8000 &
+>   NODE_PATH=<含 playwright 的 node_modules> PLAYWRIGHT_BROWSERS_PATH=<pw-browsers> \
+>     E2E_BASE_URL=http://127.0.0.1:8000 node tests/advice_e2e.cjs
+>   ```
+> - 真实付费 API 验收单独进行（配置真实 DEEPSEEK_API_KEY 后人工点击 1~2 名学生）；mock 测试
+>   不算真实 DeepSeek 调用。
+> - **过程如实记录**：提示词 25–27 之后出现两次真实 402（账户余额不足）中断，余额由用户补足后
+>   继续；本轮未伪造任何已完成状态。
+> - 第四轮纠偏（提示词 28，网络 RED 契约）：default_transport 测试全部注入受控时钟（真实
+>   monotonic 可能超过裸 9999，测试自身不得误超时）；传输用 `read1` 单次有界读取、块之间检查
+>   时钟，fake.read() 直接报错防退回聚合读取；`read1` 抛 socket.timeout → 立即安全关闭并返回
+>   TIMEOUT（不 catch 后轮询）；读取截止用正常 read1 分块 + 假时钟单独测试；120s 如实限定为
+>   「响应读取截止检查」（连接/代理/TLS 只受 socket 超时约束），保持单读取线程；
+>   新增真实 build_opener 禁跳转行为测试（本地 302 服务器 + 独立目标服务器，目标零调用、
+>   Bearer 不转发；需端口绑定，沙箱外执行，不声称沙箱已跑通）。
+> - Codex 已外部运行初始 RED 并记录 `docs/validation/advice-red-external-initial.txt`
+>   （85 tests、7 errors，含 setUpClass/import/尚未实现的 llm 参数）——只是**初始失败记录**，
+>   不是最终契约验收。
+> - 本轮不读凭据、不操作 Git/推送/邮件；全部 RED 文件完成后停止，等待 Codex 提交 RED 阶段
+>   与实现指令，不提前实现 src/static。

@@ -129,6 +129,32 @@ Q 矩阵（长表展开为 0/1 向量，顺序 KP1..KP5）与 EM 校准题参，
 | `GET /style.css` | 样式 |
 | `GET /app.js` | 前端逻辑（拉取上述接口、渲染 SVG 雷达图与图谱） |
 
+## 8. LLM 学习建议（契约已冻结，**实现未开始**）
+
+> 详见 [LLM_SUGGESTIONS.md](LLM_SUGGESTIONS.md)。以下接口当前**尚未实现**，
+> 实现完成前任何请求按既有路由规则返回 404/405。
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/llm/status` | 非付费状态：`configured/provider/model/reasoning_effort`，无密钥内容、无外网 |
+| POST | `/api/students/{id}/advice` | **唯一付费接口**：请求体严格 `{}`；服务端按 ID 重读该生已存 DINA 掌握概率与独立答对率、5 知识点与前置边（只读连接关闭后调用供应商），绝不读 `profile_id`/其他学生、不重跑 EM、不改库；成功返回服务器封装的 `{student_id, source:"llm", provider, model, reasoning_effort, request_id, advice}` |
+
+- 密钥仅来自服务端环境 `DEEPSEEK_API_KEY`（缺失 → 503 `LLM_NOT_CONFIGURED`），不进浏览器/日志/仓库；
+  `python3 -m src.server … --prompt-key` 用 `getpass` 隐藏输入、仅写当前进程环境。
+- 供应商固定 `https://api.deepseek.com/chat/completions`，`model=deepseek-v4-pro`，Bearer，
+  `thinking={type:enabled}`、`reasoning_effort=max`、`response_format={type:json_object}`、
+  `stream=false`、`max_tokens=8192`，不设 temperature，禁止重定向，不自动重试；
+  只取 `choices[0].message.content`。
+- 安全：只接受小体积 `application/json` 且严格 `{}`；拒绝 chunked/重复或歧义 Content-Length；
+  异源 Origin/`Origin:null`/不可信 Host 拒绝且不调用供应商；无宽泛 CORS；错误不回显上游 body/密钥。
+- 错误码：400 `BAD_REQUEST` / 404 `NOT_FOUND` / 405 / 413 `REQUEST_TOO_LARGE` /
+  403 `ORIGIN_FORBIDDEN`/`HOST_FORBIDDEN` / 429 `BUSY` / 503 `LLM_NOT_CONFIGURED`/`LLM_RATE_LIMITED` /
+  502 `LLM_UNAUTHORIZED`/`LLM_PAYMENT_REQUIRED`/`LLM_UPSTREAM_ERROR`/`NETWORK`/`BAD_RESPONSE` /
+  504 `TIMEOUT`（均中文提示）。
+- 前端建议区（data-testid：advice-section/generate-advice/advice-config-missing/advice-loading/
+  advice-error/advice-retry/advice-content）：只有点击才 POST；生成中禁连点；切学生清空并 abort；
+  响应校验学生 ID+序号；textContent 安全渲染。
+
 ---
 
 ## 契约要点
