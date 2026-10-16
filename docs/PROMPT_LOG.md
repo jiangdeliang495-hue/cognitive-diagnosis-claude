@@ -4,13 +4,21 @@
 **未发生的阶段不会在这里被标记为「完成」。**
 
 > **过程与模型路由（如实记录）**
-> - 实际过程：Codex 代用户操作 Claude Desktop Code；开发由本会话中的模型与
->   Superpowers 工作流完成。
+> - 前期过程：Codex 代用户操作 Claude Desktop Code；源码、测试及前期文档由该会话模型与 Superpowers 工作流完成。
+> - 后续收尾：用户授权 Codex 接手最终文档、PDF、打包与发布；收尾记录单列，不伪装成 Claude 会话提示词。
 > - 模型路由：界面 **DeepSeek V4 Pro**，发送兼容别名 `claude-opus-4-8`，
 >   **DeepSeek Gateway 路由**（`https://api.deepseek.com/anthropic`）。
 > - 本会话未读取任何 API Key，也不声称读取过真实供应商的内部身份。
 
 ---
+
+## 当前交付状态（Codex 同步，2026-10-17）
+
+- 源码阶段新增真实提交：843e621（建议契约/RED）、9b24804（后端）、986b087（前端）。此前提交保持不变，完整历史以git log为准。
+- 最新完整后端147/147、原前端15/15、建议区模拟6/6通过；记录分别为advice-backend-external-final.txt、frontend-regression-with-advice.txt、advice-e2e-final-external.txt。
+- 真实付费DeepSeek成功调用尚待用户私下提供运行时Key；mock不算真实成功。新增建议卡片截图展示未配置状态。
+- 下文是历史Prompt与阶段状态的原记录，其中“未实现/待验收/79项”等描述保留当时语境，不代表当前状态。
+- 沿用原会话编号，提示词33未收录，不据编号推断调用总数；不为补齐序号编造提示词。
 
 ## 索引（代表性阶段记录）
 
@@ -35,7 +43,7 @@
   「图谱节点长名外置」两处修复，实际是先改 `static/app.js`/`static/index.html`，**之后**才补 B8/B9 回归测试
   （证据 `docs/evidence/05-ui-regression-sequence.json`）。本文件不把这一局部过程美化成全程完美 TDD。
 
-## 真实提交与最终验证
+## 核心阶段提交与历史验收（保留原记录）
 
 - 真实提交（9 个，本会话不写 `.git`，由外部编排执行）：
   `65d020e`（docs/schema）→ `d03855c`、`b72928f`（算法 RED）→ `38744d8`（算法 GREEN）→
@@ -549,7 +557,7 @@
 >   12/11px，text-anchor middle），保持 340 viewBox、R/cx/cy、valuePts 不变。
 > - `node --check static/app.js` 通过；最终截图与浏览器复核交由外部编排核验后，本阶段方可勾选通过。
 
-## 阶段 7：LLM 学习建议（加分项）—— SDD 契约 + RED（进行中，实现未开始）
+## 阶段 7：LLM 学习建议（已实现，模拟验收通过；以下保留过程记录）
 
 > 产物：`docs/LLM_SUGGESTIONS.md`（冻结契约/模块接口/实现计划）、`docs/API_CONTRACT.md` §8
 > （新接口契约，标注实现未开始）、`tests/test_advice.py`（纯逻辑 + mock transport）、
@@ -640,3 +648,11 @@
 > - 沙箱内自检：app.js / advice_e2e.cjs 语法通过；Python 43 项纯单元 OK。
 > - 本轮不读凭据、不操作 Git/推送/邮件；**已停止，等待外部再验收**，README/PRD/架构/开发说明/
 >   LLM 文档与 PDF 待验收结果齐全后再统一同步。
+
+## 阶段 8：外部验收与 Codex 文档收尾（非 Claude 提示词）
+
+- 提示词35后，最终外部建议浏览器验收6/6通过，记录为advice-e2e-final-external.txt；故意注入500迟到日志的5/6失败记录未删除。
+- 开发工具于2026-10-17本地时间06:18:40再次返回402（Insufficient Balance）。源码与测试已完成并保存；该开发工具错误不当作应用业务测试结果。
+- 用户随后授权Codex接手收尾。Codex直接更新README、需求/架构/接口/前端/建议/算法/工具链说明、开发过程说明与提交草稿，完成PDF排版及交付编排；未将这些编辑转交Claude，不记作DeepSeek新生成。
+- 本轮不重写既有历史Prompt，不伪造用户手写/手测或未发生的真实调用。原始RED文字记录保留；advice-status-fixture-failure.png是后续C5测试fixture失败截图，原初始RED截图曾被后续运行覆盖，不将该图冒充初始未实现截图。
+- 真实建议的Key需用户私下配置，不能读取Claude凭据或在聊天里索要；缺配置的核心诊断仍可运行。GitHub公开同步已授权，邮件只为草稿。

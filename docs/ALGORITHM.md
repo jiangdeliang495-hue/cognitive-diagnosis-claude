@@ -72,4 +72,12 @@ DINA 是**离散潜在类**诊断模型：潜在空间是有限画像，题参�
 
 演示库实测（`docs/validation/demo-em-report.txt`）：EM 在 **33 轮内收敛**（`converged=True`），
 对数似然由初始 −165.27 单调升至 −135.91；最终题参与重算似然一致。
-全套 Python unittest **79 项**外部验收通过（`docs/validation/python-external-final.txt`）。
+核心阶段 Python unittest **79 项**外部验收通过（`docs/validation/python-external-final.txt`）；加入建议功能后的完整后端 **147/147** 通过（`docs/validation/advice-backend-external-final.txt`），保留全部核心回归。
+
+## 9. LLM 建议与诊断算法的职责
+
+`src/advice.py`不估计能力。它只读取当前合成学生已存的DINA概率、独立答对率、知识点与前置边，构造中文诊断快照；只在用户点击时调用DeepSeek V4 Pro最高思考，请其给出1–3项学习重点、原因、具体行动和检查方法。服务关闭只读DB连接后才联网，不读取profile_id或其他学生，不重跑EM、不写库、不改变图表概率。
+
+输出必须符合固定JSON结构：知识点ID存在且互异、文本非空并有长度限制，未知字段剥离，截断或无效内容拒绝。前端以textContent显示；结构校验不能证明建议在教学上正确，仍需人工判断。6组建议区模拟E2E已通过，真实付费生成尚待运行时配置，不能拿mock成功证明模型质量。
+
+本节及当前验收状态由Codex整理；DINA与建议源码、测试的先前Claude Code/DeepSeek生成记录保留。

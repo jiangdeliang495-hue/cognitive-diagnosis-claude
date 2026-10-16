@@ -1,8 +1,6 @@
-# LLM 学习建议（加分项）—— SDD 冻结契约与实现计划
+# LLM 学习建议（加分项）—— SDD 契约与实现说明
 
-> 状态：**契约已冻结，实现未开始**。本文与 tests/test_advice.py、tests/test_advice_api.py、
-> tests/advice_e2e.cjs 共同构成该功能的 RED 契约；实现须使三者全部转绿。
-> 真实付费 API 验收单独进行（见 §8），mock 不算真实 DeepSeek 调用。
+> 状态：**后端与前端已实现，外部模拟验收通过**。完整后端 147/147、原前端 15/15、建议区 6/6。真实付费 DeepSeek 成功调用尚待私下配置运行时密钥（见 §8）；mock 不算真实调用。
 
 ## 1. 功能边界
 
@@ -70,7 +68,7 @@
 | 502 | LLM_UPSTREAM_ERROR | 上游 3xx（重定向，**绝不跟随**）或 5xx |
 | 502 | NETWORK | URLError/OSError |
 | 502 | BAD_RESPONSE | 空 content/截断/损坏响应（HTTPException/IncompleteRead）/畸形或超长 JSON/未知或重复技能 ID/响应超字节上限 |
-| 504 | TIMEOUT | 整体截止超时（含 socket 空闲超时触发的轮询超期） |
+| 504 | TIMEOUT | socket 空闲超时立即失败，或读取块间截止检查超期；不承诺整次请求严格 120 秒 |
 | 500 | INTERNAL | 提示词序列化超过 MAX_PROMPT_BYTES 内部上限（理论上不应发生） |
 
 - 路由先**精确匹配** `/api/students/{id}/advice`，避免被学生详情的宽泛前缀误判。
@@ -155,8 +153,8 @@ MAX_REQUEST_BYTES = 4096        # 客户端 POST 请求体上限（严格 {}，4
 MAX_PROMPT_BYTES = 16384        # 供应商完整请求 JSON 上限（中文诊断 + 约束，16 KiB）
 MAX_RESPONSE_BYTES = 1_048_576  # 供应商响应上限（1 MiB）
 MAX_CONCURRENT_ADVICE = 1
-SOCKET_TIMEOUT = 60.0           # socket 空闲超时（仅轮询粒度，非整体截止）
-OVERALL_DEADLINE = 120.0        # 整体响应截止
+SOCKET_TIMEOUT = 60.0           # socket 空闲超时；触发后立即关闭，不继续轮询
+OVERALL_DEADLINE = 120.0        # 响应读取块间截止检查，非整次墙钟硬上限
 MAX_SUMMARY_LEN = 300
 MAX_REASON_LEN = 200
 MAX_ACTION_LEN = 200
@@ -169,7 +167,7 @@ class AdviceError(Exception):
     def __init__(self, code: str, message: str): ...
 
 class DeadlineError(Exception):
-    """整体响应截止触发（default_transport 内部使用）。"""
+    """响应读取截止检查触发（default_transport 内部使用）。"""
 
 def check_request_json(body: bytes) -> None
     # 严格 {}（允许首尾空白）；> MAX_REQUEST_BYTES → REQUEST_TOO_LARGE；其余畸形 → BAD_REQUEST
@@ -210,7 +208,7 @@ def call_provider(transport, api_key, prompt, *, overall_deadline=OVERALL_DEADLI
     # 失败抛 AdviceError（见 §2 错误映射的模块层部分）；不自动重试
 
 def status_payload(api_key) -> dict
-    # 空/None → 全部 None；否则 {"configured": True, "provider": "deepseek", "model": MODEL,
+    # 空/None → configured=false，其余为 None；否则 {"configured": True, "provider": "deepseek", "model": MODEL,
     # "reasoning_effort": "max"}；不含密钥
 ```
 
@@ -244,7 +242,7 @@ E2E 备注：
 - **兜底安全网**：先注册 catch-all 路由，任何未被具体 mock 接管的付费 POST 一律 abort 并判违规，
   绝不意外打到真实 API；具体 mock 后注册者优先。
 - 故意 mock 的 500/502 会产生 Chromium 的预期资源 console.error：测试仅当 console 消息
-  `location().url` 与该 case 显式注入 URL **精确匹配**、状态码为**确切 5xx** 时豁免，注入记录
+  `location().url` 与该 case 显式注入 URL **精确匹配**、文本为预期资源加载失败时豁免，注入记录
   保留至页面关闭（容忍故意失败的迟到日志），`location` 缺失不得泛化豁免；
   其余 pageerror 与非预期 console.error 仍零容忍。
 - C2/C3 用等待「请求已被捕获/已进入挂起 gate/已落定」的确定时序，不用固定 sleep 冒充竞态已测；
@@ -253,12 +251,11 @@ E2E 备注：
   合法长度连续英文长词必须换行，390px 无横向溢出。
 - 未配置/清空状态允许「隐藏的空容器」实现，断言以可见性为准而非 DOM 节点存在性。
 
-## 8. 测试与实现计划
+## 8. 实际验收与尚待验证
 
-1. **RED（本轮）**：tests/test_advice.py（纯逻辑 + mock transport）、tests/test_advice_api.py
-   （mock 供应商 + 真实本机 HTTP）、tests/advice_e2e.cjs（mock 路由交互契约）。当前 src/advice.py
-   不存在 → 收集即 RED；HTTP/浏览器受沙箱限制，外部命令见 PROMPT_LOG 阶段 7。
-2. **GREEN（下轮）**：实现 src/advice.py + server 集成 + `--prompt-key` + static 建议区，
-   使三份测试转绿；原 79 项 Python 与 15 组前端回归不回归。
-3. **真实付费验收（单独进行）**：配置真实 DEEPSEEK_API_KEY 后对 1~2 名学生做人工点击验收，
-   核对建议内容合理性与计费行为；mock 测试不算真实 DeepSeek 调用。
+1. **RED 已记录**：初始缺少 src/advice.py/llm 注入参数的失败、真实传输边界失败和网页未实现时的 0/6 均存 docs/validation/。
+2. **GREEN 已验证**：src/advice.py、server 集成、隐藏输入与建议 UI 已实现。完整后端147/147（advice-backend-external-final.txt），原前端15/15（frontend-regression-with-advice.txt），建议区6/6（advice-e2e-final-external.txt）。后端模拟供应商但运行真实本机 HTTP；浏览器付费路由全部模拟。
+3. **真实付费验收待完成**：使用有效 CA 信任链 Python 及 --prompt-key 私下输入密钥，手动生成一次；核验真实响应、来源、模型、请求 ID、页面显示与数据库不变。尚无真实成功记录，不将开发工具的模型请求算作应用验收。
+4. **TLS 环境观察**：本机系统 Python 的匿名请求出现证书链错误；Codex bundled Python 保持 TLS 验证时取得未认证 HTTP401，说明该运行时 TLS 可达，不能证明 Key 有效或付费建议成功。不可关闭证书验证。
+
+本轮文档由 Codex 根据既有实现与外部记录同步；未代替真实 API 验收。

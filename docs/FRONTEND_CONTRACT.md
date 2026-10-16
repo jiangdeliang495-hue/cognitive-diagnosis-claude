@@ -1,6 +1,6 @@
 # 前端契约（可执行验收契约）
 
-本文档冻结浏览器 E2E 依赖的 DOM 契约。可执行版本见 `tests/browser_e2e.cjs`；
+本文档冻结浏览器 E2E 依赖的 DOM 契约。可执行版本见 `tests/browser_e2e.cjs` 与 `tests/advice_e2e.cjs`；
 二者不一致时以测试为准。**前端实现必须遵循此契约**，测试才会通过。
 
 > 原则：用稳定语义 + `data-testid`，不用脆弱坐标。数值一致性以 `data-value`
@@ -78,3 +78,14 @@
 
 - JSON 保留有限浮点数（如 `0.9333333`），前端自行格式化为展示百分比；
   `data-value` 仍携带原始值供验收比对，不做截断/四舍五入到展示值。
+
+## 10. AI 学习建议（已实现）
+
+- 独立 testid：advice-section、generate-advice、advice-config-missing、advice-loading、advice-error、advice-retry、advice-content。
+- 只有当前学生详情成功后才 GET 模型状态；configured=true 才显示生成按钮，false 才显示「未配置」。状态网络/HTTP/JSON失败显示「无法获取模型配置状态，请重试」，不误报缺密钥；状态重试只 GET。
+- 只有明确激活原生按钮才 POST /api/students/{id}/advice，application/json、严格{}。生成中disabled，错误独立显示；失败不自动重试，手动生成重试才再次POST。首屏、刷新、切换不自动调用付费服务。
+- 切换立即清空并abort旧等待；学生ID与请求序号共同保护A→B→A；旧状态响应也不得启用错学生按钮。基础诊断失败清空并禁用建议。
+- summary、知识点名称、reason、actions、check全部DOM/textContent，模型文本禁innerHTML；显示来源DeepSeek V4 Pro最高思考及合成估计说明，不改变掌握概率。
+- 加载role=status、错误role=alert、原生按钮键盘Tab/Space可操作，390px连续英文长词换行无页面溢出。
+
+原前端15/15与建议区模拟6/6外部通过，分别见frontend-regression-with-advice.txt与advice-e2e-final-external.txt。付费路由全部模拟；尚无真实DeepSeek成功调用证据。本节由Codex根据已实现交互与实际验收记录同步。

@@ -1,6 +1,6 @@
 # API 契约
 
-- 协议：HTTP/1.1，`GET` 只读。
+- 协议：HTTP/1.1。核心 GET 与模型状态 GET 离线只读；建议 POST 只读数据库，但会请求外部付费服务。
 - 编码：UTF-8；`Content-Type: application/json; charset=utf-8`。
 - `application/json` **仅用于 `/api/*`**；静态资源按扩展名各给 MIME：
   `.html`→`text/html`、`.css`→`text/css`、`.js`→`text/javascript`（均 `charset=utf-8`）。
@@ -15,7 +15,7 @@
 |---|---|---|
 | 404 | `NOT_FOUND` | 资源不存在 |
 | 400 | `BAD_REQUEST` | 参数非法（含非正整数 ID） |
-| 405 | `METHOD_NOT_ALLOWED` | 非 `GET` 的 `/api/*` 请求 |
+| 405 | `METHOD_NOT_ALLOWED` | 核心 GET 接口收到非 GET 请求，或建议路径使用非 POST 方法 |
 | 500 | `INTERNAL` | 未预期异常 |
 
 ---
@@ -129,10 +129,9 @@ Q 矩阵（长表展开为 0/1 向量，顺序 KP1..KP5）与 EM 校准题参，
 | `GET /style.css` | 样式 |
 | `GET /app.js` | 前端逻辑（拉取上述接口、渲染 SVG 雷达图与图谱） |
 
-## 8. LLM 学习建议（契约已冻结，**实现未开始**）
+## 8. LLM 学习建议（已实现）
 
-> 详见 [LLM_SUGGESTIONS.md](LLM_SUGGESTIONS.md)。以下接口当前**尚未实现**，
-> 实现完成前任何请求按既有路由规则返回 404/405。
+> 详见 [LLM_SUGGESTIONS.md](LLM_SUGGESTIONS.md)。后端与建议区模拟测试已通过；真实付费成功调用尚待运行时密钥配置。
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
@@ -161,5 +160,7 @@ Q 矩阵（长表展开为 0/1 向量，顺序 KP1..KP5）与 EM 校准题参，
 
 - `mastery.prob` ∈ [0,1]，来自 32 画像对数后验边际；`correct_rate` 独立返回，UI 上必须分开呈现。
 - 所有图表数据均由上述接口提供，前端不内置任何「掌握概率」常量。
-- 服务端只读数据库，接口无副作用；真值 profile_id 不外泄。
+- 服务端只读数据库；核心 GET 无外网，建议 POST 有外部调用及潜在费用，不声称全部接口无副作用。真值 profile_id 不外泄。
 - JSON 保留**有限浮点数**（如 `0.9333333`），不做展示百分比的截断/四舍五入；前端自行格式化。
+
+文档同步：本轮由 Codex 对照已实现代码及外部测试记录整理。

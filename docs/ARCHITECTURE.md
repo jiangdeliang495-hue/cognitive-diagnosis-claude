@@ -2,7 +2,7 @@
 
 ## 1. 总览
 
-三层、零运行依赖、只读服务：
+三层、零第三方运行依赖、只读数据库；核心离线，可选建议显式联网：
 
 ```mermaid
 flowchart TD
@@ -17,6 +17,11 @@ flowchart TD
     SRV -->|"GET /api/* JSON"| WEB["浏览器<br/>index.html / style.css / app.js"]
     SRV -->|"GET / 静态页 · 按扩展名 MIME"| WEB
     WEB -->|"手写 SVG"| VIEW["雷达图 · 概率表 · 知识图谱 · 12×5 矩阵"]
+    WEB -->|"点击建议 POST，严格 JSON {}"| SRV
+    SRV -->|"只读诊断快照；关闭 DB 连接"| AI["advice.py：提示词与输出校验"]
+    AI -->|"HTTPS / deepseek-v4-pro / max"| DS["DeepSeek 付费 API"]
+    DS -->|"最终 JSON 内容"| AI
+    AI -->|"校验后纯文本建议"| SRV
 ```
 
 ## 2. 组件
@@ -27,7 +32,8 @@ flowchart TD
 | `src/data_gen.py` | 合成 12 生 / 24 题（15 单技能 + 9 综合）/ Q 矩阵 / X 矩阵（固定种子） | feat |
 | `src/dina.py` | DINA：`fit(Q, X, …)` EM 校准 + 对数后验边际；**不读 profile_id** | feat |
 | `src/seed.py` | 编排：建库 → 合成 → 校准 → 落库 | feat |
-| `src/server.py` | stdlib HTTP 服务：静态页 + `/api/*` 只读 JSON | feat |
+| `src/server.py` | stdlib HTTP：静态页、核心/状态 GET、建议 POST；只读 DB | 已实现 |
+| `src/advice.py` | 当前诊断快照提示词、固定 DeepSeek 请求、传输边界、结构校验 | 已实现 |
 | `static/` | 原生 HTML/CSS/JS，雷达图与图谱用手写 SVG | feat |
 
 ## 3. 数据流与真值隔离
@@ -38,13 +44,14 @@ flowchart TD
    `--force` 显式重建（供测试临时库）。
 2. `python3 -m src.server`（或 `python3 src/server.py`）→ 只读库，响应 `/api/*` 与静态资源；
    启动时 DB 不存在则失败（`FileNotFoundError`），绝不隐式建库。
-3. 浏览器 `app.js` 拉取 `/api/students` + `/api/students/{id}` + `/api/graph`，渲染三块视图。
+3. 浏览器拉取学生、单生诊断、图谱与全体诊断矩阵，渲染四块视图；学生详情成功后查询免费模型状态。
+4. 只有明确点击才 POST 建议；服务校验请求、Host/Origin 和并发门禁，从只读库重读当前合成学生快照，关闭连接后调用 DeepSeek，再校验 JSON 并返回。无自动重试、不重跑 EM、不保存建议、不改变概率。
 
 **真值隔离（关键）**：`fit(Q, X, …)` 只接收 Q 矩阵、X 矩阵与显式数值配置
 （先验、guess/slip 区间、迭代上限、容差），**绝不读取 `student.profile_id`**。
 `profile_id` 仅用于合成数据生成与 E2E 验证（估计 vs 真值对照），不参与估计、不经 API 暴露。
 
-## 4. 目录结构（目标态）
+## 4. 目录结构（已实现）
 
 ```
 claude-homework-t2WpwB/
@@ -56,9 +63,9 @@ claude-homework-t2WpwB/
 │   ├── LLM_SUGGESTIONS.md        # 可选，不阻塞验收
 │   ├── PROMPT_LOG.md             # 本轮起，持续记录真实提示词
 │   └── superpowers/specs/…design.md  # 本轮设计规格
-├── src/  db.py data_gen.py dina.py seed.py server.py __init__.py
+├── src/  db.py data_gen.py dina.py seed.py server.py advice.py __init__.py
 ├── static/  index.html style.css app.js
-├── tests/  test_schema.py test_seed.py test_dina.py test_api.py
+├── tests/  test_schema.py test_seed.py test_dina.py test_api.py test_cli.py test_advice.py test_advice_api.py browser_e2e.cjs advice_e2e.cjs
 └── .gitignore
 ```
 
@@ -77,7 +84,10 @@ claude-homework-t2WpwB/
 
 - 服务端**只读**数据库，不写盘、不执行外部命令。
 - 无鉴权（本地演示），仅监听 `127.0.0.1`。
-- 不访问网络、不读环境变量/密钥；远程推送、邮件、付费资源均不做。
+- 核心 GET 与状态 GET 无外网；建议 POST 仅访问固定 DeepSeek HTTPS 地址，会产生费用。
+- 密钥只由用户主动在服务端环境或隐藏输入提供，不读取 Claude 凭据、旧剪贴板或密钥链；不返回浏览器，不写入日志或仓库。
+- 保留默认 TLS 验证、禁止重定向、限制请求/响应体积、并发上限1；socket 空闲超时立即失败，120秒仅为读取块间截止检查。
+- GitHub 公开推送属于用户授权的交付操作，由 Codex 编排；应用不执行 Git 或发送邮件。
 
 ## 7. 运行与 HTTP 边界
 
@@ -86,8 +96,12 @@ claude-homework-t2WpwB/
   与 README 所述直接脚本启动（`python3 src/seed.py` / `python3 src/server.py`）。
 - `Content-Type`：仅 `/api/*` 返回 `application/json; charset=utf-8`；静态资源按扩展名
   各给 MIME（`.html`→`text/html`、`.css`→`text/css`、`.js`→`text/javascript`，均 UTF-8）。
-- 非 `GET` 的 `/api/*` 请求返回 `405 METHOD_NOT_ALLOWED`。
+- 核心 GET 路径拒绝非 GET；建议路径只接受 POST，严格 JSON `{}`；其他方法返回405。
 - `GET /api/students/{id}`：`id` 须为正整数；非正整数（0、负数、非数字）→ `400 BAD_REQUEST`，
   正整数但不存在 → `404 NOT_FOUND`。
 - seed 默认拒绝覆盖已有库（`FileExistsError`）；`--force` 显式重建（供测试临时库）。
 - 服务启动时 DB 不存在 → 失败（`FileNotFoundError`），绝不隐式建库。
+
+## 8. 验收状态与分工
+
+完整后端147/147、原前端15/15、建议区模拟E2E6/6通过，见 docs/validation/。真实付费建议成功调用待私下配置运行时密钥。当前文档同步由 Codex 完成，既有源码与测试由 Claude Code 中配置的 DeepSeek 生成。

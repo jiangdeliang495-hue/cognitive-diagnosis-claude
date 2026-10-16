@@ -1,0 +1,11 @@
+{
+  "source": "Selected Skill tool metadata only; no reasoning, signatures, raw transcript or credentials",
+  "skills": [
+    {
+      "session": "622429f8-0931-4022-90d4-0ee9cee8d8c7",
+      "timestamp": "2026-10-16T21:27:24.485Z",
+      "skill": "superpowers:test-driven-development",
+      "is_error": false
+    }
+  ]
+}

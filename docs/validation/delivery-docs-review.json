@@ -1,0 +1,13 @@
+{
+  "markdown_relative_links_resolve": true,
+  "application_and_test_source_unchanged_during_documentation": true,
+  "backend_147_pass_record_present": true,
+  "frontend_15_pass_record_present": true,
+  "advice_mock_6_pass_record_present": true,
+  "real_paid_advice_success_verified": false,
+  "real_paid_advice_pending_reason": "Runtime key has not been privately configured; mock and development-tool requests are not a live application success.",
+  "documentation_editor": "Codex",
+  "application_and_tests_origin": "Claude Code configured with DeepSeek, as recorded in toolchain evidence",
+  "pdf_pages": 1,
+  "pdf_visual_review": "Rendered page inspected; legible text, no overlap or clipping."
+}
