@@ -7,6 +7,9 @@
     "test:e2e": "node tests/browser_e2e.cjs",
     "test:e2e:http": "node tests/browser_e2e.cjs --http-only"
   },
+  "engines": {
+    "node": ">=20"
+  },
   "devDependencies": {
     "playwright": "1.62.1"
   }

@@ -4,19 +4,19 @@
 
 三层、零运行依赖、只读服务：
 
-```
-┌──────────────┐   JSON /api/*    ┌──────────────┐   SQLite(只读)   ┌──────────────┐
-│  浏览器       │ ───────────────→ │  server.py    │ ───────────────→ │ diagnosis.db  │
-│ 原生 HTML/CSS │ ←─────────────── │  (stdlib http)│                  │  Q/X/诊断/题参 │
-│ /JS + SVG     │   静态页面/JS    └──────────────┘                  └──────────────┘
-└──────────────┘
-        ▲
-        │ 构建于 seed 阶段（一次性，可复现）
-┌───────┴────────┐
-│  seed.py       │  data_gen.py ──→ 合成 12 生 × 24 题、Q/X 矩阵
-│  (stdlib)      │  dina.py     ──→ EM 校准 guess/slip + 后验边际掌握概率
-│                │  db.py       ──→ 按 schema.sql 建库并写入
-└────────────────┘
+```mermaid
+flowchart TD
+    subgraph SEED["seed.py 编排（一次性，可复现）"]
+        DG["data_gen.py：合成 Q/X、12 生 × 24 题"]
+        DI["dina.py：EM 校准 guess/slip + 后验边际掌握概率"]
+        DB["db.py：按 schema.sql 建库并写入"]
+    end
+    DG --> DI --> DB --> DBFILE[("diagnosis.db<br/>8 张表 · 只读")]
+    SRV["server.py<br/>stdlib http.server · 只读"]
+    DBFILE -->|"只读 SQLite 连接"| SRV
+    SRV -->|"GET /api/* JSON"| WEB["浏览器<br/>index.html / style.css / app.js"]
+    SRV -->|"GET / 静态页 · 按扩展名 MIME"| WEB
+    WEB -->|"手写 SVG"| VIEW["雷达图 · 概率表 · 知识图谱 · 12×5 矩阵"]
 ```
 
 ## 2. 组件

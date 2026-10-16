@@ -12,6 +12,40 @@
 
 ---
 
+## 索引（代表性阶段记录）
+
+按 SDD / TDD / E2E 分类，指向正文「提示词 N」的全文记录：
+
+| 类别 | 阶段 | 记录 | 意图 / 问题 / 纠偏 |
+|---|---|---|---|
+| SDD | 设计 | 提示词 2 | 设计复核发现三处实质缺口——Q 缺仅测 KP5 的题（32 画像不可区分）、EM 数值契约不可测、索引/真值隔离不清；锁定 24 题三份 I5+9 综合、可测 EM 契约、bit0↔KP1 |
+| TDD | 算法 RED | 提示词 5 | 补强 RED，防「始终返回初始 g/s、history 平坦、converged=False」的伪实现；加一步 EM 手算 fixture 与后验边际一致性断言 |
+| TDD | 算法 GREEN | 提示词 6 | 实现 `src/dina.py` 使 22 项通过；纯算法零依赖、对数域 logsumexp 稳定 |
+| TDD | 后端 RED | 提示词 10 | 补强后端 RED：从 SQLite 读回 Q/X 重跑真 EM 逐题比对、X 完整 288 条、API 逐格一致，排除 seed 直接用造数真值题参 |
+| TDD | 后端 GREEN | 提示词 12 | 外部 66 项 OK 后回归修复 `server.main`/HTTP 异常边界/超大 ID→400/JSON 非有限值 |
+| E2E | 前端 RED | 提示词 13 | 前端 E2E 测试先行：`tests/browser_e2e.cjs`（7 组浏览器 + HTTP 静态 MIME/编码/路径穿越契约） |
+| E2E | 前端 GREEN | 提示词 15 | 实现 `static/` 前端 + 题库 24 条题干修正（KP5 单技能给算术结果、KP3 不暗测 KP2） |
+
+## 过程真实性更正
+
+- **核心算法 / 后端 / 前端初始契约有真实测试先行**：git 历史呈现 `docs/schema → tests(RED) → feat(GREEN)`
+  （如 65d020e 设计 → d03855c/b72928f 算法 RED → 38744d8 算法 GREEN；8198b90/2e72fdb 后端 RED → 5035f7f 后端 GREEN；
+  3a21168 前端契约 → 758cc50 前端实现）。
+- **个别 UI 回归是在 QA 修复过程中追加的回归测试，不是全程都先 RED**：提示词 16 的「旧数据归属清空」与
+  「图谱节点长名外置」两处修复，实际是先改 `static/app.js`/`static/index.html`，**之后**才补 B8/B9 回归测试
+  （证据 `docs/evidence/05-ui-regression-sequence.json`）。本文件不把这一局部过程美化成全程完美 TDD。
+
+## 真实提交与最终验证
+
+- 真实提交（9 个，本会话不写 `.git`，由外部编排执行）：
+  `65d020e`（docs/schema）→ `d03855c`、`b72928f`（算法 RED）→ `38744d8`（算法 GREEN）→
+  `8198b90`、`2e72fdb`（后端 RED）→ `5035f7f`（后端 GREEN）→ `3a21168`（前端契约 RED）→ `758cc50`（前端 GREEN）。
+- 最终验证：Python 79 项 OK（`docs/validation/python-external-final.txt`）；前端 15 组通过
+  （`docs/validation/frontend-external-final.txt`）；演示 EM 33 轮收敛（`docs/validation/demo-em-report.txt`）；
+  桌面/390px 截图见 `docs/screenshots/`。
+
+---
+
 ## 阶段 0：环境核验 + 需求澄清 / 设计 / 契约（进行中）
 
 ### 提示词 1（任务契约与硬性要求，全文）
@@ -183,7 +217,7 @@
 > "关于本模型"补一段已约定的简短说明：固定均匀先验；推断保留32画像；DAG单调只用于造数；guess/slip[.02,.35]；独立Bernoulli合成噪声与小样本局限。放折叠说明中，不堆到主流程。
 > 真实按RED→修复执行，保存必要回归输出和Prompt意图。浏览器/端口受沙箱阻止时不要反复尝试，由外部编排重跑。已存在前端测试提交3a21168，记录实际状态，不写.git。完成后用中文简短报告，等待最终QA和交付文档指令。
 
-说明：告知外部浏览器验收 12/13（仅 B7 失败于 macOS Chromium 原生 select 不响应 End），并给出独立 UI 复核的两项问题（①切换/失败时旧诊断未清空导致归属错误；②图谱 KP5 白色长名溢出圆不可读），要求先补最小回归测试再按 TDD 修复，并补「关于本模型」约定说明；记录前端测试提交 3a21168。
+说明：告知外部浏览器验收 12/13（仅 B7 失败于 macOS Chromium 原生 select 不响应 End），并给出独立 UI 复核的两项问题（①切换/失败时旧诊断未清空导致归属错误；②图谱 KP5 白色长名溢出圆不可读），要求先补最小回归测试再修复（实际执行为先改实现、再追加 B8/B9 回归，见「过程真实性更正」），并补「关于本模型」约定说明；记录前端测试提交 3a21168。
 
 ### 提示词 17（基于实际桌面/390px 截图的两处小型可读性修正，全文）
 
@@ -203,6 +237,41 @@
 
 说明：外部真实验收 79 项 Python、15 组前端全绿；截图复查确认上一轮两处样式修正未真正生效的根因——① 全体矩阵 `<table>` 只有 `data-testid` 没有 `id`，使 `#all-students-table` 的 CSS 全部无效；② 雷达名称/百分比仍是两个不同半径的错位点，左右轴仍重叠。按最小修正：给 table 补 `id`；雷达每轴共用同一锚点 `lp=vertex(k,R+32)`，名称 `y=lp.y-5`、百分比 `y=lp.y+11`（相同 x、middle、12/11px）。不改数值/多边形几何/数据契约，不写新测试。
 
+### 提示词 19（最终 QA 完成，进入交付文档阶段，全文）
+
+> 最终桌面和390px截图已人工查看通过，文件为docs/screenshots/desktop.png与mobile.png，可用于README演示。
+> 最终实测已就绪：79项Python unittest全部通过（docs/validation/python-external-final.txt）；15组前端验收全部通过（6组HTTP+9组浏览器，frontend-external-final.txt；最终样式修正后已复跑并更新同一记录）。演示EM报告demo-em-report.txt显示33轮收敛。安全工具链证据已由外部编排提取到docs/evidence/，仅包含脱敏配置确认、插件安装/真实Skill调用、UI回归修改顺序元数据；不要访问原始诊断包/用户配置/转录。接下来本轮只做文档，不派子代理、不重演设计/TDD、不重读整个长Prompt日志；范围读必要部分后直接完成。
+> 最终QA已完成，准备交付文档。请只依据当前项目、真实Git历史和docs/validation的实际结果完成最终文档，不编造未发生的步骤、测试、LLM调用或人工工作。应用实现不再扩大范围。
+> 1. README.md：中文，5知识点24题12学生，演示流程、Python版本/零运行依赖、实际可运行的建库/服务启动/端口/--force命令、Python测试与可选Node浏览器测试步骤；依赖区分运行和仅QA；说明合成小样本/固定先验/题参边界/已知限制/LLM建议加分项未实现；不要要求应用API Key。GitHub/Gitee同步按用户要求暂缓，本地源码/真实历史已就绪，不写虚构仓库链接或声称已提交邮件。
+> 2. docs/TOOLCHAIN.md：如实写Claude Desktop Code+界面DeepSeek V4 Pro+兼容别名claude-opus-4-8+DeepSeek Gateway路由+Superpowers7实际Skill调用；Codex代操作、编排本地Git与外部QA；代码/测试由Claude本会话生成，Git写入和本地端口/浏览器限制由外部验收处理，非伪装成Claude沙箱内运行。引用项目内现有脱敏证据，不读取凭据、原始诊断包或完整转录。
+> 3. PROMPT_LOG：保留已有真实记录，新增最终Prompt及意图；加一个按SDD/TDD/E2E分类的代表性5–8条索引，指向实际全文记录，每条1–2句解释意图/问题/如何纠偏。不得把未发送草稿当成实际Prompt，也不要覆盖/删掉失败历史。补录真实提交与验证结果，不虚构时间。过程真实性更正：docs/evidence/05-ui-regression-sequence.json显示09b阶段先修改static/app.js再补B8/B9回归，不能写成所有UI纠偏都先RED。请纠正PROMPT_LOG中对应“先补回归再修”等不符实际的说明（保留真实Prompt原文），说明核心算法/后端与前端初始契约有真实测试先行，个别UI回归在QA修复过程中追加。不要把这一局部过程美化成全程完美TDD。
+> 4. docs/DEVELOPMENT.md：正文约1400–1700汉字，便于排成1–1.5页。写业务→技术拆解，2–3个真实协同问题（Q缺KP5测量覆盖、弱测试允许不执行EM的伪实现、Claude Git/HTTP沙箱和外部验证等），如何定位与纠偏，以及对算法工程与AI提效的理解。保持中立真实分工，不冒称提交者手写/手测过哪些工作，不要写空泛赞美。
+> 5. 算法说明需贴合实际实现：E步在对数域归一化，_marginalize对已归一化的画像后验概率求和得到边际，不声称该函数又执行logsumexp；先验影响短题列后验，不笼统保证“极端后验一定偏保守”。同步设计规格中的同类措辞。同步PRD已发生阶段状态和72小时时间盒（这是计划，不编造收到作业的准确时刻）；更新算法说明的真实演示校准结果与小样本局限。尚未实现/未验证的项如实标注。交付检查表链接全部必要文件。
+> 6. 文档图：ARCHITECTURE应有Mermaid flowchart（当前只有ASCII）；ER.md的PK_FK不是官方键语法，改为逗号分隔的PK, FK。官方依据：https://mermaid.js.org/syntax/entityRelationshipDiagram.html#attribute-keys-and-comments 。确保图与8张表/真实调用流一致，避免用新功能扩需求。
+> 7. 准备提交邮件草稿docs/SUBMISSION_DRAFT.md（含姓名/仓库链接待填写，不编造），仅草稿、不发送、不推远程。所有Markdown链接可移植，不依赖当前机器绝对路径。
+> 完成后只报告交付清单及真实仍待事项。不写.git；外部编排会排版开发说明PDF、做最终打包和清洁环境冒烟验收。
+
+说明：最终 QA 已就绪（79 项 Python + 15 组前端全绿、桌面/390px 截图由 Codex 查看通过、EM 33 轮收敛），本轮只做交付文档（README/TOOLCHAIN/DEVELOPMENT/SUBMISSION_DRAFT、PROMPT_LOG 索引与真实性更正、算法说明与设计规格措辞对齐、ARCHITECTURE Mermaid、ER 键语法、PRD 状态与 72h 时间盒）；依据真实 git 历史与 docs/validation 结果，不编造未发生步骤；GitHub/Gitee 同步暂缓、不写虚构链接、不推远程。
+
+### 提示词 20（独立最终复核的精确文档修正，全文）
+
+> 用户明确要求最高思考，当前Claude界面已核实Max，请保持Max，不切中等。继续同一项目/private/tmp/claude-homework-t2WpwB，本轮只修最终文档/忽略规则，不改业务实现，不调用子模型或新建广泛审查，不读凭据，不写.git，不推送/邮件。
+> 独立最终复核只有以下精确修正：
+> 1. docs/DEVELOPMENT.md末段"需求、审查与纠偏决策由提交者用户给出"不准确。用户提出/授权任务并确认需求取舍；Codex及审查代理负责技术拆解、独立复核、纠偏提示与操作编排；Claude Code会话中配置的DeepSeek模型生成代码/测试/文档。不要把Codex做的技术审查归到用户。截图实际由Codex查看，不写"人工查看"。docs/PROMPT_LOG.md约264行"用户补足余额并直接给出审查意见"改为"用户补足余额，Codex转达独立审查意见"，保留真实Prompt原文及真实的DAG选择记录。
+> 2. DEVELOPMENT末尾"不声称任何AI调用到达某个真实供应商"过度泛化，与配置路由证据口径不一致。改为说明：模型路由依据已验证配置与DeepSeek官方兼容别名映射，模型自称本身不作为独立身份证明。TOOLCHAIN的"开发端Claude本会话模型"明确指Claude Code中配置的DeepSeek模型，避免误指Anthropic模型。
+> 3. README补在项目根目录操作，Python测试标题改"Python测试（标准库）"，不是"运行必需"。仅QA需Node>=20（包engines已核实），实测Node24.19.0；先npm install，再npx playwright install chromium，然后给现有E2E命令。应用运行仍不需要Node、模型API Key或第三方库。交付表中的主要文档用可移植相对Markdown链接；开发过程说明同时链接docs/DEVELOPMENT.md与即将由外部编排排版的docs/DEVELOPMENT.pdf。
+> 4. docs/PRD.md约84行仍有"极端后验偏保守"保证，改为短题列受先验影响、不拟合类比例，与ALGORITHM一致。
+> 5. .gitignore补*.db.report.txt，忽略默认建库生成的运行报告，不能忽略docs/validation下的历史txt证据。
+> 记录本条真实Prompt与意图；不夸大为全程Max，之前已发生阶段保持历史记录。篇幅保持可排1–1.5页。完成后简短报告，等待外部编排生成PDF、提交文档、打包和清洁目录启动验收。
+
+说明：独立最终复核给出 5 项精确文档/规则修正——① 分工表述（技术审查归 Codex 及审查代理而非用户；截图由 Codex 查看；PROMPT_LOG 改「Codex 转达独立审查意见」，保留真实 Prompt 与 DAG 取舍记录）；② 路由口径（「不声称到达真实供应商」改为「路由依据已验证配置与 DeepSeek 官方兼容别名映射，模型自称不作为独立身份证明」，TOOLCHAIN 明确开发端是 Claude Code 中配置的 DeepSeek 模型）；③ README 根目录操作说明、Python 测试标题、QA 的 Node ≥20 与安装步骤、交付表可移植相对链接 + DEVELOPMENT.pdf；④ PRD 先验措辞与 ALGORITHM 一致；⑤ .gitignore 补 `*.db.report.txt`。本轮按要求保持 Max 思考，但**不夸大为全程 Max**——此前各阶段按其当时的历史记录（如提示词 9 记录的 Medium 恢复）如实保留。
+
+### 提示词 21（最后一处非引文事实归属修正，全文）
+
+> 最后一处只改非引文中的事实归属：docs/PROMPT_LOG.md 第254行附近"截图人工通过"应改为"截图由 Codex 查看通过"。独立复核已确认其余最终修正均到位。不要改原始历史 Prompt 引文，不修改业务代码/测试，不操作 Git/推送/邮件；如实记录本提示。继续保持 Max。完成后简短告知。
+
+说明：独立复核确认其余最终修正均到位，仅剩提示词 19 说明（非引文）中「截图人工通过」一处事实归属；已改为「截图由 Codex 查看通过」，原始历史 Prompt 引文保持不动。
+
 ### 环境核验（阶段 0，真实命令结果）
 
 - `pwd` → `/private/tmp/claude-homework-t2WpwB`（与要求一致）
@@ -211,7 +280,7 @@
 - `git --version` → `git version 2.50.1 (Apple Git-155)`
 - 技能清单含 `superpowers:brainstorming`，已通过 Skill 工具真实触发并加载其工作流。
 - 首次 builder 复核子代理因 API `402 Insufficient Balance` 提前终止（未产出结论），
-  随后用户补足余额并直接给出审查意见（提示词 2）。
+  随后用户补足余额，Codex 转达独立审查意见（提示词 2）。
 
 ---
 

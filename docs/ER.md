@@ -22,16 +22,16 @@ erDiagram
         text description
     }
     PREREQUISITE {
-        int parent_id PK_FK
-        int child_id PK_FK
+        int parent_id PK, FK
+        int child_id PK, FK
     }
     QUESTION {
         int id PK
         text stem
     }
     Q_MATRIX {
-        int question_id PK_FK
-        int kp_id PK_FK
+        int question_id PK, FK
+        int kp_id PK, FK
         int required
     }
     STUDENT {
@@ -40,18 +40,18 @@ erDiagram
         int profile_id
     }
     X_MATRIX {
-        int student_id PK_FK
-        int question_id PK_FK
+        int student_id PK, FK
+        int question_id PK, FK
         int is_correct
     }
     ITEM_PARAM {
-        int question_id PK_FK
+        int question_id PK, FK
         real guess
         real slip
     }
     DIAGNOSIS {
-        int student_id PK_FK
-        int kp_id PK_FK
+        int student_id PK, FK
+        int kp_id PK, FK
         real mastery_prob
     }
 ```
