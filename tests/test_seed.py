@@ -268,6 +268,43 @@ class SeedTests(unittest.TestCase):
         for v in g + s:
             self.assertTrue(0.02 <= v <= 0.35)
 
+    def test_seed_refit_matches_stored_params_and_diagnosis(self):
+        # 用从 SQLite 读回的 Q/X 重新跑一遍真 EM（冻结默认配置），逐题/逐格比对落库
+        # guess/slip 与 diagnosis，排除 seed 直接用造数真值题参而非校准结果的可能。
+        seed.run(self.db_path)
+        conn = self._conn()
+        q = _load_q(conn)
+        x = _load_x(conn)
+        g_stored, s_stored = _load_item_params(conn)
+        rows = conn.execute(
+            "SELECT student_id, kp_id, mastery_prob FROM diagnosis "
+            "ORDER BY student_id, kp_id"
+        ).fetchall()
+        conn.close()
+
+        res = dina.fit(q, x)  # 冻结默认配置，与 seed 内部一致
+        for i in range(N_ITEMS):
+            self.assertAlmostEqual(res.guess[i], g_stored[i], places=10)
+            self.assertAlmostEqual(res.slip[i], s_stored[i], places=10)
+        self.assertEqual(len(rows), 60)
+        for (sid, kid, prob) in rows:
+            self.assertAlmostEqual(prob, res.posterior_marginal[sid - 1][kid - 1],
+                                   places=9)
+
+    def test_seed_x_complete_288_records(self):
+        # X 必须完整覆盖 12×24=288 条 (student_id, question_id)，缺失不得当作 0。
+        seed.run(self.db_path)
+        conn = self._conn()
+        cnt = conn.execute("SELECT COUNT(*) FROM x_matrix").fetchone()[0]
+        self.assertEqual(cnt, N_STUDENTS * N_ITEMS)
+        pairs = set(conn.execute(
+            "SELECT student_id, question_id FROM x_matrix"
+        ).fetchall())
+        conn.close()
+        self.assertEqual(len(pairs), N_STUDENTS * N_ITEMS)
+        self.assertEqual(pairs, {(s, q) for s in range(1, N_STUDENTS + 1)
+                                 for q in range(1, N_ITEMS + 1)})
+
     def test_seed_deterministic(self):
         seed.run(self.db_path)
         path2 = os.path.join(self.tmpdir, "diagnosis2.db")

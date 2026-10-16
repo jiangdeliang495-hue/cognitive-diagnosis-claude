@@ -158,6 +158,53 @@ class ApiTests(unittest.TestCase):
             self.assertTrue(0.0 <= r["prob"] <= 1.0)
         self.assertNotIn("profile_id", json.dumps(data))
 
+    def test_mastery_matches_sqlite_diagnosis(self):
+        # mastery 逐学生/知识点对照 SQLite diagnosis，不能只看范围。
+        conn = sqlite3.connect(self.db_path)
+        diag = conn.execute(
+            "SELECT student_id, kp_id, mastery_prob FROM diagnosis "
+            "ORDER BY student_id, kp_id"
+        ).fetchall()
+        conn.close()
+        diag_map = {(sid, kid): prob for (sid, kid, prob) in diag}
+        for sid in range(1, 13):
+            data = self._get_json("/api/students/%d" % sid)
+            for k, m in enumerate(data["mastery"]):
+                self.assertEqual(m["kp_id"], k + 1)
+                self.assertAlmostEqual(m["prob"], diag_map[(sid, k + 1)], places=9)
+
+    def test_diagnosis_matches_sqlite_cell_by_cell(self):
+        conn = sqlite3.connect(self.db_path)
+        diag = conn.execute(
+            "SELECT student_id, kp_id, mastery_prob FROM diagnosis "
+            "ORDER BY student_id, kp_id"
+        ).fetchall()
+        conn.close()
+        data = self._get_json("/api/diagnosis")
+        matrix = data["matrix"]
+        self.assertEqual(len(matrix), len(diag))
+        for (sid, kid, prob), row in zip(diag, matrix):
+            self.assertEqual(row["student_id"], sid)
+            self.assertEqual(row["kp_id"], kid)
+            self.assertAlmostEqual(row["prob"], prob, places=9)
+
+    def test_items_match_sqlite_q_and_params(self):
+        # items 逐题对照 SQLite 展开的 Q 行与落库 guess/slip，不能只看范围/排序。
+        conn = sqlite3.connect(self.db_path)
+        q = _load_q(conn)
+        params = conn.execute(
+            "SELECT question_id, guess, slip FROM item_param ORDER BY question_id"
+        ).fetchall()
+        conn.close()
+        data = self._get_json("/api/items")
+        items = data["items"]
+        self.assertEqual(len(items), N_ITEMS)
+        for i, it in enumerate(items):
+            self.assertEqual(it["question_id"], i + 1)
+            self.assertEqual(it["q"], q[i])
+            self.assertAlmostEqual(it["guess"], params[i][1], places=9)
+            self.assertAlmostEqual(it["slip"], params[i][2], places=9)
+
     def test_two_students_differ(self):
         a = self._get_json("/api/students/1")
         b = self._get_json("/api/students/12")

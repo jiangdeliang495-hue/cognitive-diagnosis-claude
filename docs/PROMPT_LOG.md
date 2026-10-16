@@ -111,6 +111,16 @@
 
 说明：思考强度控件异常中断后的续跑指令——确认已恢复 Medium、无需重读方案，直接完成后端 RED 阶段并如实记录。
 
+### 提示词 10（补强后端 RED：三项核心数据链验证，全文）
+
+> 后端RED已由外部编排真实提交为8198b90。只读复核未发现数学错误，但需补3项核心数据链验证，先补测试保持RED，不实现逻辑、不重复方案分析：
+> 1. tests/test_seed.py用从SQLite读取的Q/X按冻结默认配置重新调用dina.fit，逐题比对落库guess/slip及diagnosis。已有“用保存g/s重算后验”不能排除seed直接使用造数真值题参，因此保留并新增真EM校准断言。
+> 2. tests/test_api.py将mastery、diagnosis按student_id/kp_id逐格对照SQLite；items逐题对照SQLite展开的Q与g/s。仅范围/排序检查不能证明来自库，补数值一致性。
+> 3. seed的X必须有12*24=288条完整(student_id,question_id)记录；缺失不能当作0掩盖。新增COUNT和完整pair集合断言。
+> 实际运行全套测试仍RED，保留原backend-red.txt，另存docs/validation/backend-red-strengthened.txt（命令/退出码/原始输出）；记录此Prompt。不要改有效的算法断言，不写.git。完成后等待后端实现指令。
+
+说明：确认 RED 提交 8198b90 无数学错误，要求补 3 项核心数据链验证——① 从 SQLite 读 Q/X 重跑真 EM 逐题比对落库题参与 diagnosis，排除 seed 直接用造数真值题参；② API 的 mastery/diagnosis/items 与 SQLite 逐格数值一致；③ X 必须 288 条完整记录、缺失不得当 0。
+
 ### 环境核验（阶段 0，真实命令结果）
 
 - `pwd` → `/private/tmp/claude-homework-t2WpwB`（与要求一致）
@@ -165,5 +175,10 @@
 >   `NotImplementedError`（待实现行为，非语法/导入错误）。原始命令、退出码与输出已存
 >   `docs/validation/backend-red.txt`。
 > - 本会话不写 `.git`；test 提交由外部编排创建。
+> - 外部编排已完成真实 RED 提交：`8198b90`。
+> - 补强（提示词 10）：新增 5 项核心数据链断言（真 EM 重校准逐题比对、X 288 条完整性、
+>   API 数值逐格对照）；`python3 -m unittest discover -s tests -v`
+>   → `Ran 50 tests ... FAILED (errors=28)`，`EXIT_CODE=1`；原始输出另存
+>   `docs/validation/backend-red-strengthened.txt`（保留原 backend-red.txt）。
 
 ## 阶段 5：E2E —— 未开始

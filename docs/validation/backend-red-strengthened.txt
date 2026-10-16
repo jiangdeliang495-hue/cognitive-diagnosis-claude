@@ -1,0 +1,362 @@
+# 后端 TDD RED（补强）—— SQLite / seed / HTTP（真实命令与退出码）
+
+$ python3 -m unittest discover -s tests -v
+
+setUpClass (test_api.ApiTests) ... ERROR
+test_determinism_fit (test_dina.FitTests.test_determinism_fit) ... ok
+test_final_params_history_and_relik_consistent (test_dina.FitTests.test_final_params_history_and_relik_consistent) ... ok
+test_fit_posterior_marginal_matches_recomputed (test_dina.FitTests.test_fit_posterior_marginal_matches_recomputed) ... ok
+test_fixed_prior_only_uniform (test_dina.FitTests.test_fixed_prior_only_uniform) ... ok
+test_item_permutation_invariance_fit (test_dina.FitTests.test_item_permutation_invariance_fit) ... ok
+test_likelihood_non_decreasing (test_dina.FitTests.test_likelihood_non_decreasing) ... ok
+test_max_iter_exhaustion_not_converged (test_dina.FitTests.test_max_iter_exhaustion_not_converged) ... ok
+test_one_step_em_hand_calc (test_dina.FitTests.test_one_step_em_hand_calc) ... ok
+test_param_bounds (test_dina.FitTests.test_param_bounds) ... ok
+test_skill_permutation_invariance_fit (test_dina.FitTests.test_skill_permutation_invariance_fit) ... ok
+test_and_gate_multi_skill (test_dina.PosteriorProfileTests.test_and_gate_multi_skill) ... ok
+test_determinism_pure (test_dina.PosteriorProfileTests.test_determinism_pure) ... ok
+test_does_not_modify_inputs (test_dina.PosteriorProfileTests.test_does_not_modify_inputs) ... ok
+test_fixed_prior_default_uniform_and_respected (test_dina.PosteriorProfileTests.test_fixed_prior_default_uniform_and_respected) ... ok
+test_item_permutation_invariance_pure (test_dina.PosteriorProfileTests.test_item_permutation_invariance_pure) ... ok
+test_k1_single_item_hand_calc (test_dina.PosteriorProfileTests.test_k1_single_item_hand_calc) ... ok
+test_long_column_log_stability (test_dina.PosteriorProfileTests.test_long_column_log_stability) ... ok
+test_marginal_is_probability_not_map_profile (test_dina.PosteriorProfileTests.test_marginal_is_probability_not_map_profile) ... ok
+test_posterior_normalization (test_dina.PosteriorProfileTests.test_posterior_normalization) ... ok
+test_profile_bit_order_matches_q_columns (test_dina.PosteriorProfileTests.test_profile_bit_order_matches_q_columns) ... ok
+test_rejects_illegal_q_x_and_shapes (test_dina.PosteriorProfileTests.test_rejects_illegal_q_x_and_shapes) ... ok
+test_skill_permutation_invariance_pure (test_dina.PosteriorProfileTests.test_skill_permutation_invariance_pure) ... ok
+test_creates_all_tables (test_schema.SchemaCreationTests.test_creates_all_tables) ... ERROR
+test_foreign_keys_enforced (test_schema.SchemaCreationTests.test_foreign_keys_enforced) ... ERROR
+test_item_param_bounds (test_schema.SchemaCreationTests.test_item_param_bounds) ... ERROR
+test_prerequisite_no_self_loop (test_schema.SchemaCreationTests.test_prerequisite_no_self_loop) ... ERROR
+test_student_profile_bounds (test_schema.SchemaCreationTests.test_student_profile_bounds) ... ERROR
+test_x_matrix_binary (test_schema.SchemaCreationTests.test_x_matrix_binary) ... ERROR
+test_32_profiles_ideal_response_distinct (test_seed.DataGenTests.test_32_profiles_ideal_response_distinct) ... ERROR
+test_generation_deterministic (test_seed.DataGenTests.test_generation_deterministic) ... ERROR
+test_no_empty_requirement_question (test_seed.DataGenTests.test_no_empty_requirement_question) ... ERROR
+test_prerequisites_frozen_and_acyclic (test_seed.DataGenTests.test_prerequisites_frozen_and_acyclic) ... ok
+test_profiles_downward_closed_along_dag (test_seed.DataGenTests.test_profiles_downward_closed_along_dag) ... ERROR
+test_q_matrix_matches_frozen_contract (test_seed.DataGenTests.test_q_matrix_matches_frozen_contract) ... ERROR
+test_q_shape_and_binary (test_seed.DataGenTests.test_q_shape_and_binary) ... ERROR
+test_q_three_i5_plus_nine_composite (test_seed.DataGenTests.test_q_three_i5_plus_nine_composite) ... ERROR
+test_students_ids_and_names (test_seed.DataGenTests.test_students_ids_and_names) ... ERROR
+test_students_profiles_frozen (test_seed.DataGenTests.test_students_profiles_frozen) ... ERROR
+test_synthesized_item_params_in_bounds (test_seed.DataGenTests.test_synthesized_item_params_in_bounds) ... ERROR
+test_x_shape_and_binary (test_seed.DataGenTests.test_x_shape_and_binary) ... ERROR
+test_seed_creates_expected_counts (test_seed.SeedTests.test_seed_creates_expected_counts) ... ERROR
+test_seed_deterministic (test_seed.SeedTests.test_seed_deterministic) ... ERROR
+test_seed_diagnosis_60_sorted_and_matches_recomputed (test_seed.SeedTests.test_seed_diagnosis_60_sorted_and_matches_recomputed) ... ERROR
+test_seed_force_rebuilds (test_seed.SeedTests.test_seed_force_rebuilds) ... ERROR
+test_seed_item_params_in_bounds (test_seed.SeedTests.test_seed_item_params_in_bounds) ... ERROR
+test_seed_prerequisites_match (test_seed.SeedTests.test_seed_prerequisites_match) ... ERROR
+test_seed_q_x_match_generation (test_seed.SeedTests.test_seed_q_x_match_generation) ... ERROR
+test_seed_refit_matches_stored_params_and_diagnosis (test_seed.SeedTests.test_seed_refit_matches_stored_params_and_diagnosis) ... ERROR
+test_seed_refuses_overwrite (test_seed.SeedTests.test_seed_refuses_overwrite) ... ERROR
+test_seed_x_complete_288_records (test_seed.SeedTests.test_seed_x_complete_288_records) ... ERROR
+
+======================================================================
+ERROR: setUpClass (test_api.ApiTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_api.py", line 57, in setUpClass
+    seed.run(cls.db_path)
+    ~~~~~~~~^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/seed.py", line 17, in run
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_creates_all_tables (test_schema.SchemaCreationTests.test_creates_all_tables)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_schema.py", line 22, in setUp
+    db.init_schema(self.conn)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/db.py", line 19, in init_schema
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_foreign_keys_enforced (test_schema.SchemaCreationTests.test_foreign_keys_enforced)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_schema.py", line 22, in setUp
+    db.init_schema(self.conn)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/db.py", line 19, in init_schema
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_item_param_bounds (test_schema.SchemaCreationTests.test_item_param_bounds)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_schema.py", line 22, in setUp
+    db.init_schema(self.conn)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/db.py", line 19, in init_schema
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_prerequisite_no_self_loop (test_schema.SchemaCreationTests.test_prerequisite_no_self_loop)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_schema.py", line 22, in setUp
+    db.init_schema(self.conn)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/db.py", line 19, in init_schema
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_student_profile_bounds (test_schema.SchemaCreationTests.test_student_profile_bounds)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_schema.py", line 22, in setUp
+    db.init_schema(self.conn)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/db.py", line 19, in init_schema
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_x_matrix_binary (test_schema.SchemaCreationTests.test_x_matrix_binary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_schema.py", line 22, in setUp
+    db.init_schema(self.conn)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/db.py", line 19, in init_schema
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_32_profiles_ideal_response_distinct (test_seed.DataGenTests.test_32_profiles_ideal_response_distinct)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_seed.py", line 108, in test_32_profiles_ideal_response_distinct
+    q = data_gen.build_q_matrix()
+  File "/private/tmp/claude-homework-t2WpwB/src/data_gen.py", line 44, in build_q_matrix
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_generation_deterministic (test_seed.DataGenTests.test_generation_deterministic)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_seed.py", line 162, in test_generation_deterministic
+    q1 = data_gen.build_q_matrix()
+  File "/private/tmp/claude-homework-t2WpwB/src/data_gen.py", line 44, in build_q_matrix
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_no_empty_requirement_question (test_seed.DataGenTests.test_no_empty_requirement_question)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_seed.py", line 104, in test_no_empty_requirement_question
+    for row in data_gen.build_q_matrix():
+               ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/private/tmp/claude-homework-t2WpwB/src/data_gen.py", line 44, in build_q_matrix
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_profiles_downward_closed_along_dag (test_seed.DataGenTests.test_profiles_downward_closed_along_dag)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_seed.py", line 131, in test_profiles_downward_closed_along_dag
+    students = data_gen.generate_students()
+  File "/private/tmp/claude-homework-t2WpwB/src/data_gen.py", line 52, in generate_students
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_q_matrix_matches_frozen_contract (test_seed.DataGenTests.test_q_matrix_matches_frozen_contract)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_seed.py", line 84, in test_q_matrix_matches_frozen_contract
+    self.assertEqual(data_gen.build_q_matrix(), EXPECTED_Q)
+                     ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/private/tmp/claude-homework-t2WpwB/src/data_gen.py", line 44, in build_q_matrix
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_q_shape_and_binary (test_seed.DataGenTests.test_q_shape_and_binary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_seed.py", line 87, in test_q_shape_and_binary
+    q = data_gen.build_q_matrix()
+  File "/private/tmp/claude-homework-t2WpwB/src/data_gen.py", line 44, in build_q_matrix
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_q_three_i5_plus_nine_composite (test_seed.DataGenTests.test_q_three_i5_plus_nine_composite)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_seed.py", line 95, in test_q_three_i5_plus_nine_composite
+    q = data_gen.build_q_matrix()
+  File "/private/tmp/claude-homework-t2WpwB/src/data_gen.py", line 44, in build_q_matrix
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_students_ids_and_names (test_seed.DataGenTests.test_students_ids_and_names)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_seed.py", line 123, in test_students_ids_and_names
+    students = data_gen.generate_students()
+  File "/private/tmp/claude-homework-t2WpwB/src/data_gen.py", line 52, in generate_students
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_students_profiles_frozen (test_seed.DataGenTests.test_students_profiles_frozen)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_seed.py", line 119, in test_students_profiles_frozen
+    profiles = [p for (_, _, p) in data_gen.generate_students()]
+                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/private/tmp/claude-homework-t2WpwB/src/data_gen.py", line 52, in generate_students
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_synthesized_item_params_in_bounds (test_seed.DataGenTests.test_synthesized_item_params_in_bounds)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_seed.py", line 189, in test_synthesized_item_params_in_bounds
+    q = data_gen.build_q_matrix()
+  File "/private/tmp/claude-homework-t2WpwB/src/data_gen.py", line 44, in build_q_matrix
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_x_shape_and_binary (test_seed.DataGenTests.test_x_shape_and_binary)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_seed.py", line 178, in test_x_shape_and_binary
+    q = data_gen.build_q_matrix()
+  File "/private/tmp/claude-homework-t2WpwB/src/data_gen.py", line 44, in build_q_matrix
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_seed_creates_expected_counts (test_seed.SeedTests.test_seed_creates_expected_counts)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_seed.py", line 207, in test_seed_creates_expected_counts
+    seed.run(self.db_path)
+    ~~~~~~~~^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/seed.py", line 17, in run
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_seed_deterministic (test_seed.SeedTests.test_seed_deterministic)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_seed.py", line 309, in test_seed_deterministic
+    seed.run(self.db_path)
+    ~~~~~~~~^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/seed.py", line 17, in run
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_seed_diagnosis_60_sorted_and_matches_recomputed (test_seed.SeedTests.test_seed_diagnosis_60_sorted_and_matches_recomputed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_seed.py", line 246, in test_seed_diagnosis_60_sorted_and_matches_recomputed
+    seed.run(self.db_path)
+    ~~~~~~~~^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/seed.py", line 17, in run
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_seed_force_rebuilds (test_seed.SeedTests.test_seed_force_rebuilds)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_seed.py", line 320, in test_seed_force_rebuilds
+    seed.run(self.db_path)
+    ~~~~~~~~^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/seed.py", line 17, in run
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_seed_item_params_in_bounds (test_seed.SeedTests.test_seed_item_params_in_bounds)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_seed.py", line 264, in test_seed_item_params_in_bounds
+    seed.run(self.db_path)
+    ~~~~~~~~^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/seed.py", line 17, in run
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_seed_prerequisites_match (test_seed.SeedTests.test_seed_prerequisites_match)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_seed.py", line 237, in test_seed_prerequisites_match
+    seed.run(self.db_path)
+    ~~~~~~~~^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/seed.py", line 17, in run
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_seed_q_x_match_generation (test_seed.SeedTests.test_seed_q_x_match_generation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_seed.py", line 222, in test_seed_q_x_match_generation
+    seed.run(self.db_path)
+    ~~~~~~~~^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/seed.py", line 17, in run
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_seed_refit_matches_stored_params_and_diagnosis (test_seed.SeedTests.test_seed_refit_matches_stored_params_and_diagnosis)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_seed.py", line 274, in test_seed_refit_matches_stored_params_and_diagnosis
+    seed.run(self.db_path)
+    ~~~~~~~~^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/seed.py", line 17, in run
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_seed_refuses_overwrite (test_seed.SeedTests.test_seed_refuses_overwrite)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_seed.py", line 315, in test_seed_refuses_overwrite
+    seed.run(self.db_path)
+    ~~~~~~~~^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/seed.py", line 17, in run
+    raise NotImplementedError
+NotImplementedError
+
+======================================================================
+ERROR: test_seed_x_complete_288_records (test_seed.SeedTests.test_seed_x_complete_288_records)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_seed.py", line 296, in test_seed_x_complete_288_records
+    seed.run(self.db_path)
+    ~~~~~~~~^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/seed.py", line 17, in run
+    raise NotImplementedError
+NotImplementedError
+
+----------------------------------------------------------------------
+Ran 50 tests in 0.040s
+
+FAILED (errors=28)
+
+EXIT_CODE=1
