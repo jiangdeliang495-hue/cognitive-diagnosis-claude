@@ -9,6 +9,7 @@
 契约见 docs/LLM_SUGGESTIONS.md §5–§6。RED 来自待实现的 src.advice 模块缺失。
 """
 
+import http.client
 import io
 import json
 import socket
@@ -355,6 +356,22 @@ class _FakeOpener:
         return self.response
 
 
+class _MemSock:
+    """内存假 socket：makefile 返回 BytesIO（构造真实 http.client.HTTPResponse 用，无网络）。"""
+
+    def __init__(self, data):
+        self._bio = io.BytesIO(data)
+
+    def makefile(self, mode):
+        return self._bio
+
+
+def _real_response(raw):
+    resp = http.client.HTTPResponse(_MemSock(raw))
+    resp.begin()
+    return resp
+
+
 class DefaultTransportTests(unittest.TestCase):
     """默认网络层行为测试：read1 单次有界读取、读取截止检查、socket 空闲超时、
     损坏响应、HTTPError 脱敏与资源关闭。全部注入受控时钟（真实 monotonic 可能远超
@@ -463,6 +480,50 @@ class DefaultTransportTests(unittest.TestCase):
         self.assertEqual(len(opener.calls), 1)  # 没有第二次请求
         self.assertNotIn("evil.example", cm.exception.message)
         self.assertNotIn("k-secret", cm.exception.message)
+
+    def test_open_stage_http_exception_maps_bad_response(self):
+        # opener.open 抛真实 http.client.HTTPException（BadStatusLine/LineTooLong 等，
+        # 非 OSError/URLError 子类）→ 必须映射 502 BAD_RESPONSE（固定中文、不暴露 repr），
+        # 不得越过 call_provider 的异常捕获落成 500
+        for exc in (http.client.BadStatusLine("junk"),
+                    http.client.LineTooLong("too long")):
+            opener = _FakeOpener(error=exc)
+            with self.assertRaises(advice.AdviceError) as cm:
+                advice.default_transport(
+                    self.URL, b"{}", {"Authorization": "Bearer k"}, 60.0,
+                    self.DEADLINE, opener=opener, clock=self._clock)
+            self.assertEqual(cm.exception.code, "BAD_RESPONSE")
+            self.assertNotIn("junk", cm.exception.message)
+            self.assertNotIn("too long", cm.exception.message)
+
+    def test_real_httpresponse_premature_eof_rejected(self):
+        # 真实 HTTPResponse（内存构造）：Content-Length 声明比实际完整 JSON 多 10 字节；
+        # read1 提前 EOF 不一定抛 IncompleteRead，读取结束必须验证剩余长度并拒绝，
+        # 不能把不完整响应当成功 JSON 接受
+        body = b'{"ok": true}'
+        raw = (b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n"
+               b"Content-Length: %d\r\n\r\n" % (len(body) + 10)) + body
+        resp = _real_response(raw)
+        opener = _FakeOpener(response=resp)
+        with self.assertRaises(advice.AdviceError) as cm:
+            advice.default_transport(self.URL, b"{}", {"Authorization": "Bearer k"},
+                                     60.0, self.DEADLINE, opener=opener,
+                                     clock=self._clock)
+        self.assertEqual(cm.exception.code, "BAD_RESPONSE")
+        self.assertTrue(resp.closed)
+
+    def test_real_httpresponse_without_content_length_supported(self):
+        # 无 Content-Length 的响应（HTTP/1.0 close-delimited）仍须正常支持
+        body = b'{"ok": true}'
+        raw = (b"HTTP/1.0 200 OK\r\nContent-Type: application/json\r\n\r\n") + body
+        resp = _real_response(raw)
+        opener = _FakeOpener(response=resp)
+        status, hdrs, got = advice.default_transport(
+            self.URL, b"{}", {"Authorization": "Bearer k"}, 60.0, self.DEADLINE,
+            opener=opener, clock=self._clock)
+        self.assertEqual(status, 200)
+        self.assertEqual(got, body)
+        self.assertTrue(resp.closed)
 
     def test_urlerror_and_open_timeout_mapping(self):
         for exc, code in [(urllib.error.URLError("boom"), "NETWORK"),

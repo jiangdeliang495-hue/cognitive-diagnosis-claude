@@ -11,12 +11,13 @@ import json
 import os
 import re
 import sys
+import threading
 import urllib.parse
 
 if __package__ in (None, ""):
     sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from src import db
+from src import advice, db
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8000
@@ -43,6 +44,26 @@ _MIME = {
 
 _POSITIVE_INT = re.compile(r"^[1-9][0-9]*$")
 
+# 建议接口错误码 → HTTP 状态（BAD_ADVICE 对外改写为 BAD_RESPONSE）
+_ADVICE_HTTP_CODES = {
+    "BAD_REQUEST": 400,
+    "REQUEST_TOO_LARGE": 413,
+    "NOT_FOUND": 404,
+    "ORIGIN_FORBIDDEN": 403,
+    "HOST_FORBIDDEN": 403,
+    "BUSY": 429,
+    "LLM_NOT_CONFIGURED": 503,
+    "LLM_UNAUTHORIZED": 502,
+    "LLM_PAYMENT_REQUIRED": 502,
+    "LLM_RATE_LIMITED": 503,
+    "LLM_UPSTREAM_ERROR": 502,
+    "NETWORK": 502,
+    "BAD_ADVICE": 502,
+    "BAD_RESPONSE": 502,
+    "TIMEOUT": 504,
+    "INTERNAL": 500,
+}
+
 
 def _parse_student_id(segment):
     """解析学生 ID：须为正整数且在 SQLite int64 范围内。
@@ -57,11 +78,30 @@ def _parse_student_id(segment):
     return True, sid
 
 
-def make_server(db_path, *, host="127.0.0.1", port=0):
-    """构造一个已绑定、只读的线程版 http.server.HTTPServer。"""
+def _is_advice_path(path):
+    """精确匹配 /api/students/{id}/advice（先于学生详情的宽泛前缀判断）。"""
+    return path.startswith("/api/students/") and path.endswith("/advice")
+
+
+def make_server(db_path, *, host="127.0.0.1", port=0, llm=None):
+    """构造一个已绑定、只读的线程版 http.server.HTTPServer。
+
+    - llm=None：自动读环境 DEEPSEEK_API_KEY（空串=未配置），transport 用默认网络层。
+    - llm={"key": str, "transport": callable}：显式配置（测试注入 mock transport）。
+    - llm={"key": None}：显式未配置。
+    - 原调用（不传 llm）与原测试完全兼容。
+    """
     if not os.path.exists(db_path):
         raise FileNotFoundError("数据库不存在：%s" % db_path)
-    handler = _make_handler(db_path)
+    if llm is None:
+        key = os.environ.get("DEEPSEEK_API_KEY", "")
+        llm = {"key": key or None, "transport": None}
+    elif isinstance(llm, dict):
+        key = llm.get("key")
+        llm = {"key": key or None, "transport": llm.get("transport")}
+    else:
+        llm = {"key": None, "transport": None}
+    handler = _make_handler(db_path, llm)
     return http.server.ThreadingHTTPServer((host, port), handler)
 
 
@@ -177,12 +217,22 @@ def _diagnosis(conn):
                        for r in rows]}
 
 
-def _make_handler(db_path):
+def _make_handler(db_path, llm_config=None):
+    if llm_config is None:
+        llm_config = {"key": None, "transport": None}
+    advice_lock = threading.Lock()  # 并发付费请求门禁（该 handler 类的全部实例共享）
+
     class Handler(http.server.BaseHTTPRequestHandler):
         protocol_version = "HTTP/1.1"
 
         def log_message(self, fmt, *args):
             pass  # 静默，避免污染测试输出
+
+        def _llm_key(self):
+            return llm_config["key"]
+
+        def _llm_transport(self):
+            return llm_config["transport"] or advice.default_transport
 
         def _send_json(self, obj, status=200):
             # JSON 拒绝非有限值（NaN/Infinity），保持标准 JSON 而非伪造字面量。
@@ -226,7 +276,11 @@ def _make_handler(db_path):
                 405)
 
         def do_POST(self):
-            self._method_not_allowed()
+            path = urllib.parse.urlparse(self.path).path
+            if _is_advice_path(path):
+                self._handle_advice(path)
+            else:
+                self._method_not_allowed()
 
         def do_PUT(self):
             self._method_not_allowed()
@@ -237,7 +291,145 @@ def _make_handler(db_path):
         def do_PATCH(self):
             self._method_not_allowed()
 
+        # -- LLM 学习建议（唯一付费接口） ---------------------------------
+
+        def _send_advice_error(self, code, message, http=None):
+            if code == "BAD_ADVICE":
+                code = "BAD_RESPONSE"  # 对外不暴露内部校验码
+            if http is None:
+                http = _ADVICE_HTTP_CODES.get(code, 502)
+            self._send_json({"error": {"code": code, "message": message}}, http)
+
+        def _origin_trusted(self, origin):
+            """同源 Origin：http://{127.0.0.1|localhost|::1}:<本服务实际绑定端口>"""
+            try:
+                parts = urllib.parse.urlsplit(origin)
+            except ValueError:
+                return False
+            if parts.scheme != "http" or parts.hostname is None or parts.port is None:
+                return False
+            if parts.hostname.lower() not in ("127.0.0.1", "localhost", "::1"):
+                return False
+            return parts.port == self.server.server_address[1]
+
+        def _handle_advice(self, path):
+            """POST /api/students/{id}/advice。检查顺序（冻结）：
+            framing → Host → Origin → ID → Content-Type/请求体 → 配置 → 并发门禁 →
+            快照 → 供应商 → 封装。任何拒绝路径都不得调用供应商。
+            """
+            try:
+                # 1) HTTP framing（先于一切，不被 Host/Origin 检查掩盖）
+                cl_values = self.headers.get_all("Content-Length") or []
+                if (self.headers.get("Transfer-Encoding") is not None
+                        or len(cl_values) > 1):
+                    self._send_advice_error("BAD_REQUEST", "请求体格式非法")
+                    return
+                # 2) Host 可信（hostname 白名单，端口不校验）
+                host_header = self.headers.get("Host") or ""
+                hostname = host_header.rsplit(":", 1)[0].lower().strip("[]")
+                if hostname not in ("127.0.0.1", "localhost", "::1"):
+                    self._send_advice_error("HOST_FORBIDDEN", "Host 不可信")
+                    return
+                # 3) Origin 同源（无 Origin 的本机 JSON 客户端允许）
+                origin = self.headers.get("Origin")
+                if origin is not None:
+                    if origin == "null" or not self._origin_trusted(origin):
+                        self._send_advice_error("ORIGIN_FORBIDDEN", "跨源请求被拒绝")
+                        return
+                # 4) 学生 ID
+                segment = path[len("/api/students/"):-len("/advice")]
+                valid, sid = _parse_student_id(segment)
+                if not valid:
+                    self._send_advice_error("BAD_REQUEST", "学生 ID 非法或超出范围")
+                    return
+                # 5) Content-Type 与请求体（小体积 + 严格 {}）
+                ctype = (self.headers.get("Content-Type") or ""
+                         ).split(";")[0].strip().lower()
+                if ctype != "application/json":
+                    self._send_advice_error(
+                        "BAD_REQUEST", "Content-Type 必须为 application/json")
+                    return
+                try:
+                    clen = int(cl_values[0])
+                except (ValueError, IndexError):
+                    self._send_advice_error("BAD_REQUEST", "Content-Length 非法")
+                    return
+                if clen > advice.MAX_REQUEST_BYTES:
+                    self._send_advice_error("REQUEST_TOO_LARGE", "请求体过大")
+                    return
+                body = self.rfile.read(clen)
+                try:
+                    advice.check_request_json(body)
+                except advice.AdviceError as e:
+                    self._send_advice_error(e.code, e.message)
+                    return
+                # 6) 配置 + 并发付费门禁（只在真正要付费时占用）
+                if not self._llm_key():
+                    self._send_advice_error(
+                        "LLM_NOT_CONFIGURED",
+                        "未配置模型密钥（服务端环境 DEEPSEEK_API_KEY）")
+                    return
+                if not advice_lock.acquire(blocking=False):
+                    self._send_advice_error("BUSY", "已有生成任务进行中，请稍后手动重试")
+                    return
+                try:
+                    self._generate_advice(sid)
+                except advice.AdviceError as e:
+                    self._send_advice_error(e.code, e.message)
+                finally:
+                    advice_lock.release()
+            except (BrokenPipeError, ConnectionResetError):
+                pass
+            except Exception:
+                self._send_advice_error("INTERNAL", "服务器内部错误")
+
+        def _generate_advice(self, sid):
+            """快照（只读库，无 profile_id/其他学生，不重跑 EM、不改库）→
+            关闭连接后调用供应商 → 结构校验 → 服务器封装（student_id/source 由服务端决定）。"""
+            conn = db.connect(db_path, read_only=True)
+            try:
+                row = conn.execute("SELECT id, name FROM student WHERE id = ?",
+                                   (sid,)).fetchone()
+                if row is None:
+                    self._send_advice_error("NOT_FOUND", "学生不存在")
+                    return
+                kps = conn.execute(
+                    "SELECT id, name FROM knowledge_point ORDER BY id").fetchall()
+                name_map = {kid: name for (kid, name) in kps}
+                mastery_rows = conn.execute(
+                    "SELECT kp_id, mastery_prob FROM diagnosis "
+                    "WHERE student_id = ? ORDER BY kp_id", (sid,)).fetchall()
+                edges = conn.execute(
+                    "SELECT parent_id, child_id FROM prerequisite "
+                    "ORDER BY parent_id, child_id").fetchall()
+                rates = _correct_rate(conn, sid)
+            finally:
+                conn.close()  # 关闭只读连接后才调用供应商
+
+            mastery = [(kid, name_map[kid], prob) for (kid, prob) in mastery_rows]
+            correct_rate = [(kid, name_map[kid], rate)
+                            for kid, rate in enumerate(rates, start=1)]
+            prompt = advice.build_prompt(mastery, correct_rate, kps, edges)
+            content, _finish, request_id, _usage = advice.call_provider(
+                self._llm_transport(), self._llm_key(), prompt)
+            parsed = advice.parse_advice(content, [kid for (kid, _name) in kps])
+            self._send_json({
+                "student_id": sid,
+                "source": "llm",
+                "provider": "deepseek",
+                "model": advice.MODEL,
+                "reasoning_effort": advice.REASONING_EFFORT,
+                "request_id": request_id,
+                "advice": parsed,
+            }, 200)
+
         def _handle_api(self, path):
+            # 建议接口先精确匹配（避免被学生详情宽泛前缀误判）；advice 仅 POST，GET 一律 405
+            if _is_advice_path(path):
+                self._send_json(
+                    {"error": {"code": "METHOD_NOT_ALLOWED", "message": "仅支持 POST"}},
+                    405)
+                return
             conn = None
             status = 200
             obj = None
@@ -253,6 +445,8 @@ def _make_handler(db_path):
                     status, obj = 200, _items(conn)
                 elif path == "/api/diagnosis":
                     status, obj = 200, _diagnosis(conn)
+                elif path == "/api/llm/status":
+                    status, obj = 200, advice.status_payload(self._llm_key())
                 elif path.startswith("/api/students/"):
                     segment = path[len("/api/students/"):]
                     valid, sid = _parse_student_id(segment)
@@ -316,7 +510,15 @@ def main(argv=None):
                         help="监听端口（默认 %(default)s）")
     parser.add_argument("--host", default=DEFAULT_HOST,
                         help="监听地址（默认 %(default)s）")
+    parser.add_argument("--prompt-key", action="store_true",
+                        help="交互式输入 DEEPSEEK_API_KEY（getpass 隐藏输入，"
+                             "仅写入当前进程环境，不存盘）")
     args = parser.parse_args(argv)
+    if args.prompt_key:
+        import getpass
+        key = getpass.getpass("请输入 DEEPSEEK_API_KEY（输入不回显）：")
+        if key.strip():
+            os.environ["DEEPSEEK_API_KEY"] = key
     srv = make_server(args.db_path, host=args.host, port=args.port)
     print("只读服务已启动：http://%s:%d" % (args.host, srv.server_address[1]))
     try:

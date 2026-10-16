@@ -359,6 +359,36 @@
 
 说明：告知两次 402 为真实余额阻塞（如实记录，不伪造已完成），余额已补足并继续 Max；Codex 已外部运行初始 RED（`docs/validation/advice-red-external-initial.txt`：85 tests、7 errors，仅初始失败记录）。网络 RED 契约最后一轮纠偏——① 所有 default_transport 测试注入受控时钟（真实 monotonic 可能超 9999，测试自身不得误超时）；② 传输改用 read1 单次有界读取、块之间检查时钟，fake.read() 直接报错防退回聚合读取；③ socket.timeout 立即关闭并 TIMEOUT（不 catch 后轮询），读取截止用正常 read1 分块 + 假时钟单独测；④ 120s 如实限定为「响应读取截止检查」，连接/代理/TLS 只受 socket 超时约束；⑤ 新增本地 302 服务器 + 独立目标服务器的真实 build_opener 行为测试（外部执行，沙箱不声称跑通）。
 
+### 提示词 29（LLM 建议后端 GREEN 实现指令，全文）
+
+> RED阶段已由Codex真实外部执行并提交。保持Max，现进入GREEN实现：本轮只完成后端src/advice.py、src/server.py及--prompt-key，不修改static（前端另一步），不操作Git/推送/邮件、不读任何真实密钥/Claude配置/Keychain。
+> 实际记录：docs/validation/advice-red-external-final.txt 新模块与llm注入参数缺失，7 tests/8 errors；浏览器RED正由外部在旧版页面运行，付费路由全mock，结束记录由Codex写入。不要把7当作所有测试方法数（模块缺失阻止发现）。原79项已有外部通过证据。
+> 先修一个确定的测试自身遗漏：tests/test_advice.py引用http.client.IncompleteRead和HTTPException却没import http.client，补import并如实记入日志，不通过删测试解决。然后严格按已冻结docs/LLM_SUGGESTIONS.md实现后端，覆盖全部新纯单元/集成测试并保持原回归。不允许返回硬编码建议、规则结果冒充LLM或仅满足结构的伪网络层。
+> 关键要求复述：固定真实deepseek-v4-pro、thinking enabled/reasoning_effort=max/max_tokens8192、JSON mode、只最终content；服务端env DEEPSEEK_API_KEY或--prompt-key(getpass隐藏输入只进当前进程、不存盘)，缺失503；GET状态不泄漏key；POST advice只接受{}、先校验真实Host/Origin/HTTP framing并限制并发，再从只读SQLite读取实时诊断快照（无profile_id、无其他学生），关闭连接后才发请求；不重跑EM、不改库。
+> 网络传输严格read1单次有界读，仅读取环节检查120s截止，不夸称严格整次墙钟时限；socket空闲超时立即关闭返回TIMEOUT；连接/TLS受socket超时约束；响应finally关闭、禁重定向、无自动重试、输入/输出字节受限、异常/上游body不回显。严格结构校验并剥离未知字段；来源/学生ID由服务端封装。
+> 默认transport、真实302不跟随与假Bearer不转发已由测试定义。路由advice先精确匹配，原6GET的非GET仍405；同源Origin成功必须可用；原CLI兼容，--prompt-key仅显式启用才询问，终端输入不可打印。必要实现内联小函数可自行选择，保持标准库零运行依赖。
+> 沙箱里能跑的单元测试真实运行并保存GREEN记录；HTTP/socket/浏览器受限如实交外部Codex运行，不将权限失败算业务失败或伪造通过。若发现测试自身确定错误，最小修正并记录原因，不能为了实现方便降低契约。完成后列出改动和真实结果，停止等外部后端验收；不要开始前端和最终文档。
+
+说明：批准进入后端 GREEN——只实现 src/advice.py、src/server.py 与 --prompt-key，不碰 static；先补 test_advice.py 缺 `import http.client` 的确定测试遗漏（如实记录），再按冻结契约实现：真实供应商参数锁定、env/--prompt-key 密钥、状态非敏感、POST 严格 {} 与 framing/Host/Origin/并发顺序、只读快照（无 profile_id/其他学生、关连接后调用、不重跑 EM 不改库）、read1 有界读取/读取截止/socket 超时立即 TIMEOUT/禁重定向/无自动重试/字节受限/不回显、结构校验剥离未知字段、服务端封装来源；沙箱可跑部分真实运行并保存 GREEN 记录。
+
+### 提示词 30（后端独立审查两处确定边界缺口，先 RED 再修，全文）
+
+> 后端独立审查已对真实HTTPResponse做内存模拟（无网络）确认两个确定边界缺口。保持Max，在本轮后端完成前先补真实失败回归再修复，记录RED/GREEN，不转前端：
+> 1. default_transport仅在read1阶段捕获HTTPException，opener.open(req)若抛http.client.BadStatusLine/LineTooLong等HTTPException，会越过call_provider的URLError/OSError捕获落成500。open阶段也应安全映射502 BAD_RESPONSE（固定中文、不得暴露repr/body），并加覆盖open阶段真实HTTPException的测试。
+> 2. 真正http.client.HTTPResponse.read1在提前EOF时不一定抛IncompleteRead。已验证Content-Length声明比实际完整JSON多10字节，当前返回200且会被当成功JSON接受（response.length还剩10）。请用HTTPResponse+内存BytesIO/假socket构造真实响应的RED，读取结束必须验证已知Content-Length/剩余长度完整，否则BAD_RESPONSE并关闭；不能只用会主动抛异常的FakeResponse冒充此覆盖。无Content-Length的正常响应仍须支持。
+> 其余主路径复核未见阻塞：TLS验证保留、禁重定向、max/8192请求参数、最终content结构校验和key隔离均正确。另宿主默认python3缺少CA，匿名DeepSeek TLS失败；Codex bundled Python已无key请求HTTP401验证TLS可用，真实演示会用该可信运行时，禁止关闭证书校验或读取Keychain。无需因此改运行依赖。
+> 完成后端与相应单元GREEN后停止，真实HTTP由Codex外部跑；不要写前端/最终交付文档，不操作Git/推送/邮件，不读真实key。
+
+说明：后端独立审查对真实 HTTPResponse 内存模拟确认两处确定边界缺口——① open 阶段 HTTPException（BadStatusLine/LineTooLong，非 OSError/URLError）未捕获会落成 500；② read1 提前 EOF 不抛 IncompleteRead，Content-Length 声明多 10 字节时不完整响应会被当成功 JSON 接受。按 TDD 先补真实失败回归（真实 HTTPResponse + 内存 BytesIO/假 socket）再修复：open 阶段补 HTTPException → 502 BAD_RESPONSE；读取结束验证 resp.length 剩余长度（无 CL 响应仍支持）。其余主路径（TLS 验证/禁重定向/max 8192/结构校验/key 隔离）复核通过；宿主默认 python3 缺 CA，真实演示用 Codex bundled 可信运行时，禁止关闭证书校验或读 Keychain。
+
+### 提示词 31（外部首轮完整后端回归：两处测试自身命名错误修正，全文）
+
+> 外部首次完整后端回归真实结果已落盘docs/validation/advice-backend-external-initial.txt：Ran 144 tests，142通过、2 errors，均为新增测试自身确定命名错误：
+> test_advice_upstream_error_mapping_and_no_leak（约439行）和test_advice_network_and_timeout_mapping（约471行）把局部变量http赋为预期HTTP整数，随后又调用http.client.HTTPConnection，导致AttributeError:'int' object has no attribute 'client'。请最小改名expected_http/http_status，保留原有状态码/脱敏断言，不删除或降低测试，日志如实记为测试修正而非业务失败。
+> 继续完成上一条真实HTTPResponse的两处TDD修复后补此错误；纯单元可在沙箱跑，完整HTTP由Codex再执行。保持Max，不开始前端/最终文档，不读真实密钥、不操作Git/推送/邮件。完成后端全部修正后停止等验收。
+
+说明：外部首次完整后端回归 144 tests、142 通过、2 errors，均为新增测试自身命名错误——两个测试把局部变量 `http` 赋为预期 HTTP 整数，遮蔽模块名导致 `http.client.HTTPConnection` 报 `AttributeError`。最小改名 `http → expected_http`（保留全部状态码/脱敏断言，不删不降），如实记为测试修正而非业务失败；上一轮两处真实 HTTPResponse 边界修复保持 GREEN。
+
 ### 环境核验（阶段 0，真实命令结果）
 
 - `pwd` → `/private/tmp/claude-homework-t2WpwB`（与要求一致）
@@ -534,5 +564,30 @@
 > - Codex 已外部运行初始 RED 并记录 `docs/validation/advice-red-external-initial.txt`
 >   （85 tests、7 errors，含 setUpClass/import/尚未实现的 llm 参数）——只是**初始失败记录**，
 >   不是最终契约验收。
-> - 本轮不读凭据、不操作 Git/推送/邮件；全部 RED 文件完成后停止，等待 Codex 提交 RED 阶段
->   与实现指令，不提前实现 src/static。
+> - 测试自身遗漏修正（提示词 29）：`tests/test_advice.py` 引用 `http.client.IncompleteRead`/
+>   `HTTPException` 但未 `import http.client`，已补导入（不删测试），如实记录。
+> - **后端 GREEN（本会话实现，沙箱内可核验部分）**：实现 `src/advice.py`（纯标准库：严格 {} 校验、
+>   中文提示词、结构校验剥离未知字段、供应商载荷锁定、NoRedirect opener、read1 单次有界读取、
+>   读取截止检查、socket 空闲超时立即 TIMEOUT、损坏响应脱敏、call_provider 只取最终 content/
+>   仅 finish_reason=stop、status_payload 非敏感）与 `src/server.py` 集成（`make_server(llm=…)` 注入、
+>   GET `/api/llm/status`、POST `/api/students/{id}/advice` 先精确匹配、framing→Host→Origin→ID→
+>   请求体→配置→并发门禁（共享 Lock，BUSY 429）→只读快照（关连接后调用，无 profile_id/其它学生，
+>   不重跑 EM 不改库）→服务器封装，`--prompt-key` 用 getpass 仅写当前进程环境）。
+> - 沙箱内真实结果（存 `docs/validation/advice-green-sandbox.txt`）：`tests.test_advice` **40/40 OK**；
+>   全套 `Ran 107 tests ... FAILED (errors=9)`，9 个错误**全部**为沙箱 `socket.bind`
+>   `PermissionError: Operation not permitted`（HTTP/socket 测试需端口绑定），**零业务失败**、
+>   未伪造通过；HTTP/socket 部分交 Codex 沙箱外运行同一测试并回填真实结果。
+> - 边界回归（提示词 30）：先补两条真实失败回归并跑出 RED（存
+>   `docs/validation/advice-boundary-red.txt`：open 阶段 `BadStatusLine` 逃逸为 ERROR；
+>   提前 EOF 不完整响应被当成功 FAIL），再修复（open 阶段补 HTTPException→502 BAD_RESPONSE；
+>   读取结束验证 `resp.length` 剩余长度，无 CL 响应仍支持），修复后
+>   `DefaultTransportTests` 11/11 OK、`tests.test_advice` **43/43 OK**；全套沙箱内
+>   `Ran 110 tests ... FAILED (errors=9)`，9 个错误仍全部为沙箱 socket.bind EPERM（HTTP/socket
+>   交 Codex 沙箱外运行），零业务失败（记录已追加到 `docs/validation/advice-green-sandbox.txt`）。
+> - 测试自身命名错误修正（提示词 31）：两个测试局部变量 `http` 遮蔽模块名，最小改名
+>   `expected_http`（保留全部断言，不删不降），如实记为测试修正而非业务失败；外部首轮结果
+>   `docs/validation/advice-backend-external-initial.txt`（144 tests、142 通过、2 errors 均为该命名错误）。
+> - 修正后沙箱内：`tests.test_advice` 43/43 OK；全套 `Ran 110 tests ... FAILED (errors=9)`，
+>   9 个错误仍全部为沙箱 socket.bind EPERM（HTTP/socket 由 Codex 沙箱外再执行），零业务失败
+>   （记录追加于 `docs/validation/advice-green-sandbox.txt`）。
+> - 本轮不读凭据、不操作 Git/推送/邮件；**已停止，等待外部后端验收**，不开始前端与最终文档。

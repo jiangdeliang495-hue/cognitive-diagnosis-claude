@@ -427,7 +427,7 @@ class AdviceApiTests(unittest.TestCase):
             (429, 503, "LLM_RATE_LIMITED"),
             (500, 502, "LLM_UPSTREAM_ERROR"),
         ]
-        for upstream, http, code in cases:
+        for upstream, expected_http, code in cases:
             srv = server.make_server(
                 self.db_path, host="127.0.0.1", port=0,
                 llm={"key": TEST_KEY,
@@ -443,7 +443,7 @@ class AdviceApiTests(unittest.TestCase):
                 resp = conn.getresponse()
                 raw = resp.read()
                 conn.close()
-                self.assertEqual(resp.status, http, code)
+                self.assertEqual(resp.status, expected_http, code)
                 text = raw.decode("utf-8")
                 err = json.loads(text)["error"]
                 self.assertEqual(err["code"], code)
@@ -461,7 +461,7 @@ class AdviceApiTests(unittest.TestCase):
             (_raising_transport(_sock.timeout("idle")), 504, "TIMEOUT"),
             (_raising_transport(urllib.error.URLError("boom")), 502, "NETWORK"),
         ]
-        for transport, http, code in cases:
+        for transport, expected_http, code in cases:
             srv = server.make_server(
                 self.db_path, host="127.0.0.1", port=0,
                 llm={"key": TEST_KEY, "transport": transport})
@@ -475,7 +475,7 @@ class AdviceApiTests(unittest.TestCase):
                 resp = conn.getresponse()
                 raw = resp.read()
                 conn.close()
-                self.assertEqual(resp.status, http, code)
+                self.assertEqual(resp.status, expected_http, code)
                 self.assertEqual(json.loads(raw.decode("utf-8"))["error"]["code"], code)
             finally:
                 srv.shutdown()

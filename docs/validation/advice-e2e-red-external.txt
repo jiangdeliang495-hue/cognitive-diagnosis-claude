@@ -1,0 +1,34 @@
+External execution of Claude-authored advice E2E.
+Command: E2E_BASE_URL=http://127.0.0.1:8765 node tests/advice_e2e.cjs
+Advice/status routes are mocked; this is not a paid DeepSeek call.
+被测服务：http://127.0.0.1:8765
+  ✘ C1 首屏/切学生/刷新不自动发付费 POST，configured 才显示按钮
+      locator.waitFor: Timeout 10000ms exceeded.
+  ✘ C2 POST 方法/JSON 体/严格{}核对；生成中禁用；各字段字面 HTML 不执行
+      locator.waitFor: Timeout 30000ms exceeded.
+  ✘ C3 A→B→A 竞态：最早 A 最后返回，同学生旧请求绝不覆盖新建议
+      locator.waitFor: Timeout 30000ms exceeded.
+  ✘ C4 失败后恰好一次请求，手动重试恰好第二次，不影响诊断区
+      locator.waitFor: Timeout 30000ms exceeded.
+  ✘ C5 未配置提示（可隐藏容器）；状态翻转为已配置后仅手动生成一次
+      locator.waitFor: Timeout 10000ms exceeded.
+  ✘ C6 Tab/Space 键盘激活按钮；390px 长英文单词换行无横向溢出
+      locator.waitFor: Timeout 30000ms exceeded.
+
+──────────────────────────────
+结果：0 通过 / 6 失败（共 6 项）
+  - C1 首屏/切学生/刷新不自动发付费 POST，configured 才显示按钮
+    locator.waitFor: Timeout 10000ms exceeded.
+  - C2 POST 方法/JSON 体/严格{}核对；生成中禁用；各字段字面 HTML 不执行
+    locator.waitFor: Timeout 30000ms exceeded.
+  - C3 A→B→A 竞态：最早 A 最后返回，同学生旧请求绝不覆盖新建议
+    locator.waitFor: Timeout 30000ms exceeded.
+  - C4 失败后恰好一次请求，手动重试恰好第二次，不影响诊断区
+    locator.waitFor: Timeout 30000ms exceeded.
+  - C5 未配置提示（可隐藏容器）；状态翻转为已配置后仅手动生成一次
+    locator.waitFor: Timeout 10000ms exceeded.
+  - C6 Tab/Space 键盘激活按钮；390px 长英文单词换行无横向溢出
+    locator.waitFor: Timeout 30000ms exceeded.
+EXIT_CODE=1
+
+PROCESS_EXIT_CODE=1

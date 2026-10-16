@@ -1,0 +1,375 @@
+LLM 学习建议 —— 后端 GREEN（沙箱内可运行部分）
+Command: python3 -m unittest tests.test_advice -v
+test_fixed_url_bearer_and_json_body_within_prompt_limit (tests.test_advice.BuildRequestTests.test_fixed_url_bearer_and_json_body_within_prompt_limit) ... ok
+test_prompt_payload_over_limit_rejected (tests.test_advice.BuildRequestTests.test_prompt_payload_over_limit_rejected) ... ok
+test_bad_response_cases (tests.test_advice.CallProviderTests.test_bad_response_cases) ... ok
+test_bad_response_structure_cases (tests.test_advice.CallProviderTests.test_bad_response_structure_cases) ... ok
+test_deadline_is_monotonic_plus_overall_deadline (tests.test_advice.CallProviderTests.test_deadline_is_monotonic_plus_overall_deadline) ... ok
+test_error_messages_do_not_echo_upstream_or_key (tests.test_advice.CallProviderTests.test_error_messages_do_not_echo_upstream_or_key) ... ok
+test_http_error_mapping (tests.test_advice.CallProviderTests.test_http_error_mapping) ... ok
+test_network_and_timeout_mapping (tests.test_advice.CallProviderTests.test_network_and_timeout_mapping) ... ok
+test_only_finish_reason_stop_succeeds (tests.test_advice.CallProviderTests.test_only_finish_reason_stop_succeeds) ... ok
+test_success_returns_content_only_fields (tests.test_advice.CallProviderTests.test_success_returns_content_only_fields) ... ok
+test_302_redirect_never_followed_and_no_auth_forwarded (tests.test_advice.DefaultTransportTests.test_302_redirect_never_followed_and_no_auth_forwarded) ... ok
+test_corrupt_response_maps_bad_response_and_closes (tests.test_advice.DefaultTransportTests.test_corrupt_response_maps_bad_response_and_closes) ... ok
+test_http_error_mapping_sanitized_and_fp_closed (tests.test_advice.DefaultTransportTests.test_http_error_mapping_sanitized_and_fp_closed) ... ok
+test_overall_deadline_checked_between_read1_chunks (tests.test_advice.DefaultTransportTests.test_overall_deadline_checked_between_read1_chunks) ... ok
+test_size_limit_closes_response (tests.test_advice.DefaultTransportTests.test_size_limit_closes_response) ... ok
+test_socket_idle_timeout_closes_immediately_timout (tests.test_advice.DefaultTransportTests.test_socket_idle_timeout_closes_immediately_timout) ... ok
+test_success_closes_response (tests.test_advice.DefaultTransportTests.test_success_closes_response) ... ok
+test_urlerror_and_open_timeout_mapping (tests.test_advice.DefaultTransportTests.test_urlerror_and_open_timeout_mapping) ... ok
+test_rejects_bad_actions (tests.test_advice.ParseAdviceTests.test_rejects_bad_actions) ... ok
+test_rejects_bad_or_overlong_summary (tests.test_advice.ParseAdviceTests.test_rejects_bad_or_overlong_summary) ... ok
+test_rejects_bad_text_fields_and_lengths (tests.test_advice.ParseAdviceTests.test_rejects_bad_text_fields_and_lengths) ... ok
+test_rejects_boolean_kp_id (tests.test_advice.ParseAdviceTests.test_rejects_boolean_kp_id) ... ok
+test_rejects_empty_or_non_json (tests.test_advice.ParseAdviceTests.test_rejects_empty_or_non_json) ... ok
+test_rejects_empty_priority_list_and_too_many (tests.test_advice.ParseAdviceTests.test_rejects_empty_priority_list_and_too_many) ... ok
+test_rejects_missing_keys_and_wrong_types (tests.test_advice.ParseAdviceTests.test_rejects_missing_keys_and_wrong_types) ... ok
+test_rejects_unknown_or_duplicate_kp_id (tests.test_advice.ParseAdviceTests.test_rejects_unknown_or_duplicate_kp_id) ... ok
+test_unknown_fields_stripped_not_passed_through (tests.test_advice.ParseAdviceTests.test_unknown_fields_stripped_not_passed_through) ... ok
+test_valid_advice_parsed (tests.test_advice.ParseAdviceTests.test_valid_advice_parsed) ... ok
+test_locked_fields_no_temperature (tests.test_advice.PayloadTests.test_locked_fields_no_temperature) ... ok
+test_prompt_contains_chinese_guardrails (tests.test_advice.PromptTests.test_prompt_contains_chinese_guardrails) ... ok
+test_prompt_contains_kp_names_and_3_decimal_probs (tests.test_advice.PromptTests.test_prompt_contains_kp_names_and_3_decimal_probs) ... ok
+test_prompt_differs_between_students (tests.test_advice.PromptTests.test_prompt_differs_between_students) ... ok
+test_prompt_has_no_profile_or_key_reference (tests.test_advice.PromptTests.test_prompt_has_no_profile_or_key_reference) ... ok
+test_prompt_lists_prerequisite_edges (tests.test_advice.PromptTests.test_prompt_lists_prerequisite_edges) ... ok
+test_accepts_strict_empty_object (tests.test_advice.RequestJsonTests.test_accepts_strict_empty_object) ... ok
+test_rejects_non_empty_object_and_other_json (tests.test_advice.RequestJsonTests.test_rejects_non_empty_object_and_other_json) ... ok
+test_rejects_non_utf8 (tests.test_advice.RequestJsonTests.test_rejects_non_utf8) ... ok
+test_rejects_oversized_body (tests.test_advice.RequestJsonTests.test_rejects_oversized_body) ... ok
+test_configured_and_unconfigured (tests.test_advice.StatusPayloadTests.test_configured_and_unconfigured) ... ok
+test_status_never_contains_key (tests.test_advice.StatusPayloadTests.test_status_never_contains_key) ... ok
+
+----------------------------------------------------------------------
+Ran 40 tests in 0.007s
+
+OK
+PURE_EXIT_CODE=0
+
+---- 全套回归（沙箱内）----
+Command: python3 -m unittest discover -s tests -v
+test_fixed_url_bearer_and_json_body_within_prompt_limit (test_advice.BuildRequestTests.test_fixed_url_bearer_and_json_body_within_prompt_limit) ... ok
+test_prompt_payload_over_limit_rejected (test_advice.BuildRequestTests.test_prompt_payload_over_limit_rejected) ... ok
+test_bad_response_cases (test_advice.CallProviderTests.test_bad_response_cases) ... ok
+test_bad_response_structure_cases (test_advice.CallProviderTests.test_bad_response_structure_cases) ... ok
+test_deadline_is_monotonic_plus_overall_deadline (test_advice.CallProviderTests.test_deadline_is_monotonic_plus_overall_deadline) ... ok
+test_error_messages_do_not_echo_upstream_or_key (test_advice.CallProviderTests.test_error_messages_do_not_echo_upstream_or_key) ... ok
+test_http_error_mapping (test_advice.CallProviderTests.test_http_error_mapping) ... ok
+test_network_and_timeout_mapping (test_advice.CallProviderTests.test_network_and_timeout_mapping) ... ok
+test_only_finish_reason_stop_succeeds (test_advice.CallProviderTests.test_only_finish_reason_stop_succeeds) ... ok
+test_success_returns_content_only_fields (test_advice.CallProviderTests.test_success_returns_content_only_fields) ... ok
+test_302_redirect_never_followed_and_no_auth_forwarded (test_advice.DefaultTransportTests.test_302_redirect_never_followed_and_no_auth_forwarded) ... ok
+test_corrupt_response_maps_bad_response_and_closes (test_advice.DefaultTransportTests.test_corrupt_response_maps_bad_response_and_closes) ... ok
+test_http_error_mapping_sanitized_and_fp_closed (test_advice.DefaultTransportTests.test_http_error_mapping_sanitized_and_fp_closed) ... ok
+test_overall_deadline_checked_between_read1_chunks (test_advice.DefaultTransportTests.test_overall_deadline_checked_between_read1_chunks) ... ok
+test_size_limit_closes_response (test_advice.DefaultTransportTests.test_size_limit_closes_response) ... ok
+test_socket_idle_timeout_closes_immediately_timout (test_advice.DefaultTransportTests.test_socket_idle_timeout_closes_immediately_timout) ... ok
+test_success_closes_response (test_advice.DefaultTransportTests.test_success_closes_response) ... ok
+test_urlerror_and_open_timeout_mapping (test_advice.DefaultTransportTests.test_urlerror_and_open_timeout_mapping) ... ok
+test_rejects_bad_actions (test_advice.ParseAdviceTests.test_rejects_bad_actions) ... ok
+test_rejects_bad_or_overlong_summary (test_advice.ParseAdviceTests.test_rejects_bad_or_overlong_summary) ... ok
+test_rejects_bad_text_fields_and_lengths (test_advice.ParseAdviceTests.test_rejects_bad_text_fields_and_lengths) ... ok
+test_rejects_boolean_kp_id (test_advice.ParseAdviceTests.test_rejects_boolean_kp_id) ... ok
+test_rejects_empty_or_non_json (test_advice.ParseAdviceTests.test_rejects_empty_or_non_json) ... ok
+test_rejects_empty_priority_list_and_too_many (test_advice.ParseAdviceTests.test_rejects_empty_priority_list_and_too_many) ... ok
+test_rejects_missing_keys_and_wrong_types (test_advice.ParseAdviceTests.test_rejects_missing_keys_and_wrong_types) ... ok
+test_rejects_unknown_or_duplicate_kp_id (test_advice.ParseAdviceTests.test_rejects_unknown_or_duplicate_kp_id) ... ok
+test_unknown_fields_stripped_not_passed_through (test_advice.ParseAdviceTests.test_unknown_fields_stripped_not_passed_through) ... ok
+test_valid_advice_parsed (test_advice.ParseAdviceTests.test_valid_advice_parsed) ... ok
+test_locked_fields_no_temperature (test_advice.PayloadTests.test_locked_fields_no_temperature) ... ok
+test_prompt_contains_chinese_guardrails (test_advice.PromptTests.test_prompt_contains_chinese_guardrails) ... ok
+test_prompt_contains_kp_names_and_3_decimal_probs (test_advice.PromptTests.test_prompt_contains_kp_names_and_3_decimal_probs) ... ok
+test_prompt_differs_between_students (test_advice.PromptTests.test_prompt_differs_between_students) ... ok
+test_prompt_has_no_profile_or_key_reference (test_advice.PromptTests.test_prompt_has_no_profile_or_key_reference) ... ok
+test_prompt_lists_prerequisite_edges (test_advice.PromptTests.test_prompt_lists_prerequisite_edges) ... ok
+test_accepts_strict_empty_object (test_advice.RequestJsonTests.test_accepts_strict_empty_object) ... ok
+test_rejects_non_empty_object_and_other_json (test_advice.RequestJsonTests.test_rejects_non_empty_object_and_other_json) ... ok
+test_rejects_non_utf8 (test_advice.RequestJsonTests.test_rejects_non_utf8) ... ok
+test_rejects_oversized_body (test_advice.RequestJsonTests.test_rejects_oversized_body) ... ok
+test_configured_and_unconfigured (test_advice.StatusPayloadTests.test_configured_and_unconfigured) ... ok
+test_status_never_contains_key (test_advice.StatusPayloadTests.test_status_never_contains_key) ... ok
+setUpClass (test_advice_api.AdviceApiTests) ... ERROR
+test_prompt_reflects_modified_db_actual_rates_and_edges (test_advice_api.AdviceSnapshotIsolationTests.test_prompt_reflects_modified_db_actual_rates_and_edges) ... ERROR
+test_second_distinct_upstream_content_maps_verbatim (test_advice_api.AdviceSnapshotIsolationTests.test_second_distinct_upstream_content_maps_verbatim) ... ERROR
+test_status_and_advice_when_not_configured (test_advice_api.AdviceUnconfiguredTests.test_status_and_advice_when_not_configured) ... ERROR
+test_status_reads_env_key_when_llm_none (test_advice_api.AdviceUnconfiguredTests.test_status_reads_env_key_when_llm_none) ... ERROR
+test_status_unconfigured_when_env_empty (test_advice_api.AdviceUnconfiguredTests.test_status_unconfigured_when_env_empty) ... ERROR
+test_302_not_followed_and_bearer_not_forwarded (test_advice_api.DefaultTransportRedirectTests.test_302_not_followed_and_bearer_not_forwarded) ... ERROR
+setUpClass (test_api.ApiTests) ... ERROR
+test_protocol_version_http11 (test_api.HandlerProtocolTests.test_protocol_version_http11) ... ok
+test_valid_and_invalid_ids (test_api.StudentIdParsingTests.test_valid_and_invalid_ids) ... ok
+test_creates_db_via_module (test_cli.SeedCliTests.test_creates_db_via_module) ... ok
+test_creates_db_via_script (test_cli.SeedCliTests.test_creates_db_via_script) ... ok
+test_force_rebuilds (test_cli.SeedCliTests.test_force_rebuilds) ... ok
+test_help_via_module (test_cli.SeedCliTests.test_help_via_module) ... ok
+test_help_via_script (test_cli.SeedCliTests.test_help_via_script) ... ok
+test_help_via_module (test_cli.ServerCliTests.test_help_via_module) ... ok
+test_help_via_script (test_cli.ServerCliTests.test_help_via_script) ... ok
+test_startup_and_serve_via_module (test_cli.ServerCliTests.test_startup_and_serve_via_module) ... ERROR
+test_determinism_fit (test_dina.FitTests.test_determinism_fit) ... ok
+test_final_params_history_and_relik_consistent (test_dina.FitTests.test_final_params_history_and_relik_consistent) ... ok
+test_fit_posterior_marginal_matches_recomputed (test_dina.FitTests.test_fit_posterior_marginal_matches_recomputed) ... ok
+test_fixed_prior_only_uniform (test_dina.FitTests.test_fixed_prior_only_uniform) ... ok
+test_item_permutation_invariance_fit (test_dina.FitTests.test_item_permutation_invariance_fit) ... ok
+test_likelihood_non_decreasing (test_dina.FitTests.test_likelihood_non_decreasing) ... ok
+test_max_iter_exhaustion_not_converged (test_dina.FitTests.test_max_iter_exhaustion_not_converged) ... ok
+test_one_step_em_hand_calc (test_dina.FitTests.test_one_step_em_hand_calc) ... ok
+test_param_bounds (test_dina.FitTests.test_param_bounds) ... ok
+test_skill_permutation_invariance_fit (test_dina.FitTests.test_skill_permutation_invariance_fit) ... ok
+test_and_gate_multi_skill (test_dina.PosteriorProfileTests.test_and_gate_multi_skill) ... ok
+test_determinism_pure (test_dina.PosteriorProfileTests.test_determinism_pure) ... ok
+test_does_not_modify_inputs (test_dina.PosteriorProfileTests.test_does_not_modify_inputs) ... ok
+test_fixed_prior_default_uniform_and_respected (test_dina.PosteriorProfileTests.test_fixed_prior_default_uniform_and_respected) ... ok
+test_item_permutation_invariance_pure (test_dina.PosteriorProfileTests.test_item_permutation_invariance_pure) ... ok
+test_k1_single_item_hand_calc (test_dina.PosteriorProfileTests.test_k1_single_item_hand_calc) ... ok
+test_long_column_log_stability (test_dina.PosteriorProfileTests.test_long_column_log_stability) ... ok
+test_marginal_is_probability_not_map_profile (test_dina.PosteriorProfileTests.test_marginal_is_probability_not_map_profile) ... ok
+test_posterior_normalization (test_dina.PosteriorProfileTests.test_posterior_normalization) ... ok
+test_profile_bit_order_matches_q_columns (test_dina.PosteriorProfileTests.test_profile_bit_order_matches_q_columns) ... ok
+test_rejects_illegal_q_x_and_shapes (test_dina.PosteriorProfileTests.test_rejects_illegal_q_x_and_shapes) ... ok
+test_skill_permutation_invariance_pure (test_dina.PosteriorProfileTests.test_skill_permutation_invariance_pure) ... ok
+test_creates_all_tables (test_schema.SchemaCreationTests.test_creates_all_tables) ... ok
+test_foreign_keys_enforced (test_schema.SchemaCreationTests.test_foreign_keys_enforced) ... ok
+test_item_param_bounds (test_schema.SchemaCreationTests.test_item_param_bounds) ... ok
+test_prerequisite_no_self_loop (test_schema.SchemaCreationTests.test_prerequisite_no_self_loop) ... ok
+test_student_profile_bounds (test_schema.SchemaCreationTests.test_student_profile_bounds) ... ok
+test_x_matrix_binary (test_schema.SchemaCreationTests.test_x_matrix_binary) ... ok
+test_32_profiles_ideal_response_distinct (test_seed.DataGenTests.test_32_profiles_ideal_response_distinct) ... ok
+test_generation_deterministic (test_seed.DataGenTests.test_generation_deterministic) ... ok
+test_no_empty_requirement_question (test_seed.DataGenTests.test_no_empty_requirement_question) ... ok
+test_prerequisites_frozen_and_acyclic (test_seed.DataGenTests.test_prerequisites_frozen_and_acyclic) ... ok
+test_profiles_downward_closed_along_dag (test_seed.DataGenTests.test_profiles_downward_closed_along_dag) ... ok
+test_q_matrix_matches_frozen_contract (test_seed.DataGenTests.test_q_matrix_matches_frozen_contract) ... ok
+test_q_shape_and_binary (test_seed.DataGenTests.test_q_shape_and_binary) ... ok
+test_q_three_i5_plus_nine_composite (test_seed.DataGenTests.test_q_three_i5_plus_nine_composite) ... ok
+test_students_ids_and_names (test_seed.DataGenTests.test_students_ids_and_names) ... ok
+test_students_profiles_frozen (test_seed.DataGenTests.test_students_profiles_frozen) ... ok
+test_synthesized_item_params_in_bounds (test_seed.DataGenTests.test_synthesized_item_params_in_bounds) ... ok
+test_x_shape_and_binary (test_seed.DataGenTests.test_x_shape_and_binary) ... ok
+test_question_stems_distinct_descriptive_and_isolated (test_seed.SeedTests.test_question_stems_distinct_descriptive_and_isolated) ... ok
+test_seed_creates_expected_counts (test_seed.SeedTests.test_seed_creates_expected_counts) ... ok
+test_seed_deterministic (test_seed.SeedTests.test_seed_deterministic) ... ok
+test_seed_diagnosis_60_sorted_and_matches_recomputed (test_seed.SeedTests.test_seed_diagnosis_60_sorted_and_matches_recomputed) ... ok
+test_seed_force_rebuilds (test_seed.SeedTests.test_seed_force_rebuilds) ... ok
+test_seed_item_params_in_bounds (test_seed.SeedTests.test_seed_item_params_in_bounds) ... ok
+test_seed_prerequisites_match (test_seed.SeedTests.test_seed_prerequisites_match) ... ok
+test_seed_q_x_match_generation (test_seed.SeedTests.test_seed_q_x_match_generation) ... ok
+test_seed_refit_matches_stored_params_and_diagnosis (test_seed.SeedTests.test_seed_refit_matches_stored_params_and_diagnosis) ... ok
+test_seed_refuses_overwrite (test_seed.SeedTests.test_seed_refuses_overwrite) ... ok
+test_seed_x_complete_288_records (test_seed.SeedTests.test_seed_x_complete_288_records) ... ok
+
+======================================================================
+ERROR: setUpClass (test_advice_api.AdviceApiTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 134, in setUpClass
+    cls.srv = server.make_server(
+              ~~~~~~~~~~~~~~~~~~^
+        cls.db_path, host="127.0.0.1", port=0,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        llm={"key": TEST_KEY, "transport": cls.transport})
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/server.py", line 105, in make_server
+    return http.server.ThreadingHTTPServer((host, port), handler)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 457, in __init__
+    self.server_bind()
+    ~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 136, in server_bind
+    socketserver.TCPServer.server_bind(self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 478, in server_bind
+    self.socket.bind(self.server_address)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_prompt_reflects_modified_db_actual_rates_and_edges (test_advice_api.AdviceSnapshotIsolationTests.test_prompt_reflects_modified_db_actual_rates_and_edges)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 682, in test_prompt_reflects_modified_db_actual_rates_and_edges
+    status, raw = self._post(transport)
+                  ~~~~~~~~~~^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 662, in _post
+    srv = server.make_server(
+        self.db_path, host="127.0.0.1", port=0,
+        llm={"key": TEST_KEY, "transport": transport})
+  File "/private/tmp/claude-homework-t2WpwB/src/server.py", line 105, in make_server
+    return http.server.ThreadingHTTPServer((host, port), handler)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 457, in __init__
+    self.server_bind()
+    ~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 136, in server_bind
+    socketserver.TCPServer.server_bind(self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 478, in server_bind
+    self.socket.bind(self.server_address)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_second_distinct_upstream_content_maps_verbatim (test_advice_api.AdviceSnapshotIsolationTests.test_second_distinct_upstream_content_maps_verbatim)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 710, in test_second_distinct_upstream_content_maps_verbatim
+    status, raw = self._post(transport)
+                  ~~~~~~~~~~^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 662, in _post
+    srv = server.make_server(
+        self.db_path, host="127.0.0.1", port=0,
+        llm={"key": TEST_KEY, "transport": transport})
+  File "/private/tmp/claude-homework-t2WpwB/src/server.py", line 105, in make_server
+    return http.server.ThreadingHTTPServer((host, port), handler)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 457, in __init__
+    self.server_bind()
+    ~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 136, in server_bind
+    socketserver.TCPServer.server_bind(self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 478, in server_bind
+    self.socket.bind(self.server_address)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_status_and_advice_when_not_configured (test_advice_api.AdviceUnconfiguredTests.test_status_and_advice_when_not_configured)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 608, in test_status_and_advice_when_not_configured
+    srv = self._serve({"key": None})
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 592, in _serve
+    srv = server.make_server(self.db_path, host="127.0.0.1", port=0, llm=llm)
+  File "/private/tmp/claude-homework-t2WpwB/src/server.py", line 105, in make_server
+    return http.server.ThreadingHTTPServer((host, port), handler)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 457, in __init__
+    self.server_bind()
+    ~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 136, in server_bind
+    socketserver.TCPServer.server_bind(self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 478, in server_bind
+    self.socket.bind(self.server_address)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_status_reads_env_key_when_llm_none (test_advice_api.AdviceUnconfiguredTests.test_status_reads_env_key_when_llm_none)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 626, in test_status_reads_env_key_when_llm_none
+    srv = self._serve(None)
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 592, in _serve
+    srv = server.make_server(self.db_path, host="127.0.0.1", port=0, llm=llm)
+  File "/private/tmp/claude-homework-t2WpwB/src/server.py", line 105, in make_server
+    return http.server.ThreadingHTTPServer((host, port), handler)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 457, in __init__
+    self.server_bind()
+    ~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 136, in server_bind
+    socketserver.TCPServer.server_bind(self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 478, in server_bind
+    self.socket.bind(self.server_address)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_status_unconfigured_when_env_empty (test_advice_api.AdviceUnconfiguredTests.test_status_unconfigured_when_env_empty)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 636, in test_status_unconfigured_when_env_empty
+    srv = self._serve(None)
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 592, in _serve
+    srv = server.make_server(self.db_path, host="127.0.0.1", port=0, llm=llm)
+  File "/private/tmp/claude-homework-t2WpwB/src/server.py", line 105, in make_server
+    return http.server.ThreadingHTTPServer((host, port), handler)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 457, in __init__
+    self.server_bind()
+    ~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 136, in server_bind
+    socketserver.TCPServer.server_bind(self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 478, in server_bind
+    self.socket.bind(self.server_address)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_302_not_followed_and_bearer_not_forwarded (test_advice_api.DefaultTransportRedirectTests.test_302_not_followed_and_bearer_not_forwarded)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 751, in test_302_not_followed_and_bearer_not_forwarded
+    target_port, _ = self._serve_once(target_handler)
+                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice_api.py", line 724, in _serve_once
+    srv.bind(("127.0.0.1", 0))
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: setUpClass (test_api.ApiTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_api.py", line 58, in setUpClass
+    cls.srv = server.make_server(cls.db_path, host="127.0.0.1", port=0)
+              ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/server.py", line 105, in make_server
+    return http.server.ThreadingHTTPServer((host, port), handler)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 457, in __init__
+    self.server_bind()
+    ~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 136, in server_bind
+    socketserver.TCPServer.server_bind(self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 478, in server_bind
+    self.socket.bind(self.server_address)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_startup_and_serve_via_module (test_cli.ServerCliTests.test_startup_and_serve_via_module)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_cli.py", line 78, in test_startup_and_serve_via_module
+    s.bind(("127.0.0.1", 0))
+    ~~~~~~^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 1] Operation not permitted
+
+----------------------------------------------------------------------
+Ran 107 tests in 3.899s
+
+FAILED (errors=9)
+FULL_EXIT_CODE=1
+
+---- 编译检查 ----
+Command: python3 -m py_compile src/advice.py src/server.py
+COMPILE OK
+
+说明：沙箱内 107 项中 98 项通过；9 个错误全部为沙箱 socket.bind
+PermissionError: Operation not permitted（HTTP/socket 测试需本机端口绑定，
+由 Codex 在沙箱外运行同一测试回填真实结果），零业务失败、未伪造通过。
+
+---- 边界回归 RED → GREEN（独立审查两处确定边界缺口）----
+RED 记录见 docs/validation/advice-boundary-red.txt：
+  1) test_open_stage_http_exception_maps_bad_response → ERROR: http.client.BadStatusLine: junk
+  2) test_real_httpresponse_premature_eof_rejected → FAIL: AdviceError not raised（不完整响应被当成功）
+修复后：python3 -m unittest tests.test_advice.DefaultTransportTests -v → Ran 11 tests ... OK；
+python3 -m unittest tests.test_advice -v → Ran 43 tests ... OK。
+全套沙箱内：Ran 110 tests ... FAILED (errors=9)，9 个错误全部为沙箱 socket.bind
+PermissionError: Operation not permitted（HTTP/socket 测试需端口绑定，由 Codex 沙箱外运行），零业务失败。
+
+---- 外部首轮回归的测试自身命名错误修正（提示词 31）----
+外部结果（docs/validation/advice-backend-external-initial.txt）：Ran 144 tests，142 通过、
+2 errors——test_advice_upstream_error_mapping_and_no_leak 与 test_advice_network_and_timeout_mapping
+的局部变量 http 遮蔽模块名，http.client.HTTPConnection 报 AttributeError。
+修正：两个测试循环变量最小改名 http → expected_http，保留全部状态码/脱敏断言，未删除或降低测试；
+这是测试自身命名错误，不是业务失败。
+修正后沙箱内：tests.test_advice 43/43 OK；全套 Ran 110 tests ... FAILED (errors=9)，
+9 个错误仍全部为沙箱 socket.bind EPERM（HTTP/socket 由 Codex 沙箱外运行），零业务失败。

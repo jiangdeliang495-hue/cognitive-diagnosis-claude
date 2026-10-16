@@ -1,0 +1,45 @@
+LLM 建议后端 —— 边界回归 RED（真实 HTTPResponse 内存构造，沙箱内可跑）
+Command: python3 -m unittest tests.test_advice.DefaultTransportTests -v
+test_302_redirect_never_followed_and_no_auth_forwarded (tests.test_advice.DefaultTransportTests.test_302_redirect_never_followed_and_no_auth_forwarded) ... ok
+test_corrupt_response_maps_bad_response_and_closes (tests.test_advice.DefaultTransportTests.test_corrupt_response_maps_bad_response_and_closes) ... ok
+test_http_error_mapping_sanitized_and_fp_closed (tests.test_advice.DefaultTransportTests.test_http_error_mapping_sanitized_and_fp_closed) ... ok
+test_open_stage_http_exception_maps_bad_response (tests.test_advice.DefaultTransportTests.test_open_stage_http_exception_maps_bad_response) ... ERROR
+test_overall_deadline_checked_between_read1_chunks (tests.test_advice.DefaultTransportTests.test_overall_deadline_checked_between_read1_chunks) ... ok
+test_real_httpresponse_premature_eof_rejected (tests.test_advice.DefaultTransportTests.test_real_httpresponse_premature_eof_rejected) ... FAIL
+test_real_httpresponse_without_content_length_supported (tests.test_advice.DefaultTransportTests.test_real_httpresponse_without_content_length_supported) ... ok
+test_size_limit_closes_response (tests.test_advice.DefaultTransportTests.test_size_limit_closes_response) ... ok
+test_socket_idle_timeout_closes_immediately_timout (tests.test_advice.DefaultTransportTests.test_socket_idle_timeout_closes_immediately_timout) ... ok
+test_success_closes_response (tests.test_advice.DefaultTransportTests.test_success_closes_response) ... ok
+test_urlerror_and_open_timeout_mapping (tests.test_advice.DefaultTransportTests.test_urlerror_and_open_timeout_mapping) ... ok
+
+======================================================================
+ERROR: test_open_stage_http_exception_maps_bad_response (tests.test_advice.DefaultTransportTests.test_open_stage_http_exception_maps_bad_response)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice.py", line 492, in test_open_stage_http_exception_maps_bad_response
+    advice.default_transport(
+    ~~~~~~~~~~~~~~~~~~~~~~~~^
+        self.URL, b"{}", {"Authorization": "Bearer k"}, 60.0,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.DEADLINE, opener=opener, clock=self._clock)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/advice.py", line 231, in default_transport
+    resp = opener.open(req, timeout=socket_timeout)
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice.py", line 355, in open
+    raise self.error
+http.client.BadStatusLine: junk
+
+======================================================================
+FAIL: test_real_httpresponse_premature_eof_rejected (tests.test_advice.DefaultTransportTests.test_real_httpresponse_premature_eof_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_advice.py", line 508, in test_real_httpresponse_premature_eof_rejected
+    with self.assertRaises(advice.AdviceError) as cm:
+         ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+AssertionError: AdviceError not raised
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.005s
+
+FAILED (failures=1, errors=1)
+EXIT_CODE=1
