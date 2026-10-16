@@ -272,6 +272,16 @@
 
 说明：独立复核确认其余最终修正均到位，仅剩提示词 19 说明（非引文）中「截图人工通过」一处事实归属；已改为「截图由 Codex 查看通过」，原始历史 Prompt 引文保持不动。
 
+### 提示词 22（用户授权推送 GitHub，仅改发布元数据，全文）
+
+> 用户现在明确要求把完成的项目推送到 GitHub，并已完成账号授权。外部编排 Codex 已实际创建私有仓库 https://github.com/jiangdeliang495-hue/cognitive-diagnosis-claude ，配置最终交付目录的 origin，接下来由 Codex 执行并验证推送。你保持 Max，只在当前临时项目修改发布元数据：
+> 1. README.md 末尾移除“远程同步暂缓”的当前状态，改为真实 GitHub 仓库 Markdown 链接，并说明这是私有仓库，评审需要仓库访问权限；邮件仍未发送。不要提前声称推送验证完成。
+> 2. docs/SUBMISSION_DRAFT.md 标题只保留“仅草稿，未发送”；说明姓名待填、仓库链接已填；正文仓库替换为上述真实链接；末尾去掉“不推远程”以及“仓库链接待填写”等旧状态，保留未发送、姓名待填写以及评审需访问私有仓库的说明。
+> 3. docs/PROMPT_LOG.md 保留全部历史 Prompt 原文和当时暂缓同步的真实记录，追加本次真实 Prompt（22）及说明：用户现已授权上传；私有仓库已创建；实际推送和远程验证由 Codex 进行。不要编造完成状态、邀请评审或发送邮件。
+> 不改业务代码、测试、其他文档或PDF；不读凭据、不操作Git、不访问GitHub。完成后列出改动文件。
+
+说明：用户已授权上传 GitHub；Codex 已实际创建私有仓库 `https://github.com/jiangdeliang495-hue/cognitive-diagnosis-claude` 并配置 origin，**实际推送与远程验证由 Codex 执行**。本会话只更新发布元数据（README 仓库链接与私有说明、SUBMISSION_DRAFT 状态、本日志），不编造推送完成状态、未邀请评审、未发送邮件；历史「暂缓同步」记录保留在原文中。
+
 ### 环境核验（阶段 0，真实命令结果）
 
 - `pwd` → `/private/tmp/claude-homework-t2WpwB`（与要求一致）
