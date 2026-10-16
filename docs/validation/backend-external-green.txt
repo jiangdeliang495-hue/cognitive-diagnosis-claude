@@ -1,0 +1,93 @@
+External orchestration verification after CLI/HTTP regression fixes
+Command: python3 -m unittest discover -s tests -v
+test_correct_rate_recomputed (test_api.ApiTests.test_correct_rate_recomputed) ... ok
+test_diagnosis_matches_sqlite_cell_by_cell (test_api.ApiTests.test_diagnosis_matches_sqlite_cell_by_cell) ... ok
+test_diagnosis_sorted_and_ranges (test_api.ApiTests.test_diagnosis_sorted_and_ranges) ... ok
+test_get_does_not_change_db (test_api.ApiTests.test_get_does_not_change_db) ... ok
+test_graph (test_api.ApiTests.test_graph) ... ok
+test_http_version_11 (test_api.ApiTests.test_http_version_11) ... ok
+test_items (test_api.ApiTests.test_items) ... ok
+test_items_match_sqlite_q_and_params (test_api.ApiTests.test_items_match_sqlite_q_and_params) ... ok
+test_mastery_matches_sqlite_diagnosis (test_api.ApiTests.test_mastery_matches_sqlite_diagnosis) ... ok
+test_meta (test_api.ApiTests.test_meta) ... ok
+test_missing_db_fails_without_creating (test_api.ApiTests.test_missing_db_fails_without_creating) ... ok
+test_non_get_method_not_allowed (test_api.ApiTests.test_non_get_method_not_allowed) ... ok
+test_student_bad_request (test_api.ApiTests.test_student_bad_request) ... ok
+test_student_detail_shape (test_api.ApiTests.test_student_detail_shape) ... ok
+test_student_id_too_large_returns_400 (test_api.ApiTests.test_student_id_too_large_returns_400) ... ok
+test_student_not_found (test_api.ApiTests.test_student_not_found) ... ok
+test_students (test_api.ApiTests.test_students) ... ok
+test_two_students_differ (test_api.ApiTests.test_two_students_differ) ... ok
+test_protocol_version_http11 (test_api.HandlerProtocolTests.test_protocol_version_http11) ... ok
+test_valid_and_invalid_ids (test_api.StudentIdParsingTests.test_valid_and_invalid_ids) ... ok
+test_creates_db_via_module (test_cli.SeedCliTests.test_creates_db_via_module) ... ok
+test_creates_db_via_script (test_cli.SeedCliTests.test_creates_db_via_script) ... ok
+test_force_rebuilds (test_cli.SeedCliTests.test_force_rebuilds) ... ok
+test_help_via_module (test_cli.SeedCliTests.test_help_via_module) ... ok
+test_help_via_script (test_cli.SeedCliTests.test_help_via_script) ... ok
+test_help_via_module (test_cli.ServerCliTests.test_help_via_module) ... ok
+test_help_via_script (test_cli.ServerCliTests.test_help_via_script) ... ok
+test_startup_and_serve_via_module (test_cli.ServerCliTests.test_startup_and_serve_via_module) ... /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/case.py:606: ResourceWarning: unclosed file <_io.TextIOWrapper name=3 encoding='UTF-8'>
+  if method() is not None:
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/unittest/case.py:606: ResourceWarning: unclosed file <_io.TextIOWrapper name=6 encoding='UTF-8'>
+  if method() is not None:
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_determinism_fit (test_dina.FitTests.test_determinism_fit) ... ok
+test_final_params_history_and_relik_consistent (test_dina.FitTests.test_final_params_history_and_relik_consistent) ... ok
+test_fit_posterior_marginal_matches_recomputed (test_dina.FitTests.test_fit_posterior_marginal_matches_recomputed) ... ok
+test_fixed_prior_only_uniform (test_dina.FitTests.test_fixed_prior_only_uniform) ... ok
+test_item_permutation_invariance_fit (test_dina.FitTests.test_item_permutation_invariance_fit) ... ok
+test_likelihood_non_decreasing (test_dina.FitTests.test_likelihood_non_decreasing) ... ok
+test_max_iter_exhaustion_not_converged (test_dina.FitTests.test_max_iter_exhaustion_not_converged) ... ok
+test_one_step_em_hand_calc (test_dina.FitTests.test_one_step_em_hand_calc) ... ok
+test_param_bounds (test_dina.FitTests.test_param_bounds) ... ok
+test_skill_permutation_invariance_fit (test_dina.FitTests.test_skill_permutation_invariance_fit) ... ok
+test_and_gate_multi_skill (test_dina.PosteriorProfileTests.test_and_gate_multi_skill) ... ok
+test_determinism_pure (test_dina.PosteriorProfileTests.test_determinism_pure) ... ok
+test_does_not_modify_inputs (test_dina.PosteriorProfileTests.test_does_not_modify_inputs) ... ok
+test_fixed_prior_default_uniform_and_respected (test_dina.PosteriorProfileTests.test_fixed_prior_default_uniform_and_respected) ... ok
+test_item_permutation_invariance_pure (test_dina.PosteriorProfileTests.test_item_permutation_invariance_pure) ... ok
+test_k1_single_item_hand_calc (test_dina.PosteriorProfileTests.test_k1_single_item_hand_calc) ... ok
+test_long_column_log_stability (test_dina.PosteriorProfileTests.test_long_column_log_stability) ... ok
+test_marginal_is_probability_not_map_profile (test_dina.PosteriorProfileTests.test_marginal_is_probability_not_map_profile) ... ok
+test_posterior_normalization (test_dina.PosteriorProfileTests.test_posterior_normalization) ... ok
+test_profile_bit_order_matches_q_columns (test_dina.PosteriorProfileTests.test_profile_bit_order_matches_q_columns) ... ok
+test_rejects_illegal_q_x_and_shapes (test_dina.PosteriorProfileTests.test_rejects_illegal_q_x_and_shapes) ... ok
+test_skill_permutation_invariance_pure (test_dina.PosteriorProfileTests.test_skill_permutation_invariance_pure) ... ok
+test_creates_all_tables (test_schema.SchemaCreationTests.test_creates_all_tables) ... ok
+test_foreign_keys_enforced (test_schema.SchemaCreationTests.test_foreign_keys_enforced) ... ok
+test_item_param_bounds (test_schema.SchemaCreationTests.test_item_param_bounds) ... ok
+test_prerequisite_no_self_loop (test_schema.SchemaCreationTests.test_prerequisite_no_self_loop) ... ok
+test_student_profile_bounds (test_schema.SchemaCreationTests.test_student_profile_bounds) ... ok
+test_x_matrix_binary (test_schema.SchemaCreationTests.test_x_matrix_binary) ... ok
+test_32_profiles_ideal_response_distinct (test_seed.DataGenTests.test_32_profiles_ideal_response_distinct) ... ok
+test_generation_deterministic (test_seed.DataGenTests.test_generation_deterministic) ... ok
+test_no_empty_requirement_question (test_seed.DataGenTests.test_no_empty_requirement_question) ... ok
+test_prerequisites_frozen_and_acyclic (test_seed.DataGenTests.test_prerequisites_frozen_and_acyclic) ... ok
+test_profiles_downward_closed_along_dag (test_seed.DataGenTests.test_profiles_downward_closed_along_dag) ... ok
+test_q_matrix_matches_frozen_contract (test_seed.DataGenTests.test_q_matrix_matches_frozen_contract) ... ok
+test_q_shape_and_binary (test_seed.DataGenTests.test_q_shape_and_binary) ... ok
+test_q_three_i5_plus_nine_composite (test_seed.DataGenTests.test_q_three_i5_plus_nine_composite) ... ok
+test_students_ids_and_names (test_seed.DataGenTests.test_students_ids_and_names) ... ok
+test_students_profiles_frozen (test_seed.DataGenTests.test_students_profiles_frozen) ... ok
+test_synthesized_item_params_in_bounds (test_seed.DataGenTests.test_synthesized_item_params_in_bounds) ... ok
+test_x_shape_and_binary (test_seed.DataGenTests.test_x_shape_and_binary) ... ok
+test_seed_creates_expected_counts (test_seed.SeedTests.test_seed_creates_expected_counts) ... ok
+test_seed_deterministic (test_seed.SeedTests.test_seed_deterministic) ... ok
+test_seed_diagnosis_60_sorted_and_matches_recomputed (test_seed.SeedTests.test_seed_diagnosis_60_sorted_and_matches_recomputed) ... ok
+test_seed_force_rebuilds (test_seed.SeedTests.test_seed_force_rebuilds) ... ok
+test_seed_item_params_in_bounds (test_seed.SeedTests.test_seed_item_params_in_bounds) ... ok
+test_seed_prerequisites_match (test_seed.SeedTests.test_seed_prerequisites_match) ... ok
+test_seed_q_x_match_generation (test_seed.SeedTests.test_seed_q_x_match_generation) ... ok
+test_seed_refit_matches_stored_params_and_diagnosis (test_seed.SeedTests.test_seed_refit_matches_stored_params_and_diagnosis) ... ok
+test_seed_refuses_overwrite (test_seed.SeedTests.test_seed_refuses_overwrite) ... ok
+test_seed_x_complete_288_records (test_seed.SeedTests.test_seed_x_complete_288_records) ... ok
+
+----------------------------------------------------------------------
+Ran 78 tests in 4.157s
+
+OK
+
+EXIT_CODE=0

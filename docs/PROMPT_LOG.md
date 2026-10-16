@@ -121,6 +121,24 @@
 
 说明：确认 RED 提交 8198b90 无数学错误，要求补 3 项核心数据链验证——① 从 SQLite 读 Q/X 重跑真 EM 逐题比对落库题参与 diagnosis，排除 seed 直接用造数真值题参；② API 的 mastery/diagnosis/items 与 SQLite 逐格数值一致；③ X 必须 288 条完整记录、缺失不得当 0。
 
+### 提示词 11（进入后端 GREEN：实现 SQLite/造数/seed/HTTP，全文）
+
+> 后端测试已真实RED并提交，现在按Superpowers TDD实现SQLite/造数/seed/HTTP，保持现有测试有效。请直接实现，不再做需求脑暴或扩大范围。应用仍零运行依赖，仅Python标准库和SQLite，所有文件在当前项目。
+> 按已冻结schema/API与测试实现src/db.py、data_gen.py、seed.py、server.py。24题=三份I5+9综合题，KP5单技能题只考数量关系/列式并给出算术结果；12名合成真值保持已选DAG单调。seed确定性、拒绝默认覆盖、--force明确重建；fit只接Q/X，不读真值；以EM最终g/s与后验写入SQLite，保留校准历史与收敛状态的可核验本地报告。HTTP连接mode=ro，6个JSON GET接口、稳定排序、相关题答对率独立重算、错误处理、127.0.0.1监听、正确JSON编码；实现静态安全路由以便下一轮接页面，但本轮不写前端。
+> 运行全部Python unittest，使算法与后端一起GREEN；保存命令/退出码/原始输出到docs/validation/backend-green.txt。若发现测试实际错误先说明依据，不为通过而删减断言。更新简短算法文档docs/ALGORITHM.md（公式、EM约束、数据局限、实际验证）与PROMPT_LOG。本轮不写.git，由外部编排提交。结束只报告真实测试数和结果，等待前端/E2E阶段指令。
+
+说明：批准进入后端 GREEN——按冻结 schema/API 与测试实现 db/data_gen/seed/server；seed 只写 EM 最终 g/s 与后验、保留可核验本地报告；HTTP 只读连接、6 个 JSON GET、独立重算答对率、静态安全路由；本轮不写前端。
+
+### 提示词 12（外部验收结果 + 两组契约缺口的回归修复，全文）
+
+> 外部编排已在沙箱外原样运行你的全套测试，真实结果：Ran66tests in2.604s、OK、EXIT_CODE=0。完整输出已复制到当前项目docs/validation/backend-external-initial.txt。请如实记录：不是通过修改Claude沙箱设置，而是Codex在已授权的外部验收环境运行同一脚本；无需你开启allowLocalBinding或再诊断端口权限。
+> 提交前独立代码复核发现两组真实契约缺口，请按TDD先补必要测试得到RED再修复，不重做方案：
+> 1. server.main默认用DEFAULT_DB_PATH但未定义；seed/server顶端from src在直接脚本运行时失败。两者应支持-m和直接脚本启动，定义与seed一致的默认DB路径；用argparse给清晰--help及参数说明，保留已支持位置DB路径、端口、--force的可用性，README稍后与实际一致。增加真实subprocess --help/临时DB启动验证，不能只测make_server而漏main。
+> 2. HTTP请求边界缺少except，连接/查询异常会断连接，不返回500 INTERNAL JSON。把建连接也纳入异常边界，可靠关闭连接；服务错误返回安全中文JSON，不泄漏堆栈/路径。超大正整数字符串ID应按契约返回400（在API文档补整数存储范围），不触发sqlite OverflowError/断开。JSON按契约拒绝非有限值，HTTP/1.1契约应与protocol_version一致。添加最小边界回归测试。
+> 保存新增回归的真实RED与修复后结果，保留原始backend-green.txt失败记录并注明其为Claude沙箱内结果。你仍可跑非HTTP检查；HTTP受限准确注明，外部编排将重跑全套。更新PROMPT_LOG，补记后端补强测试提交2e72fdb。不要写.git，不写前端。简短报告完成内容后等待前端/E2E阶段指令。
+
+说明：告知外部编排已在沙箱外原样跑出 66 项 OK（非改沙箱设置），并要求按 TDD 修复两组契约缺口——① server.main 缺 DEFAULT_DB_PATH、直接脚本 `from src` 导入失败，改用 argparse 并补 subprocess 验证；② HTTP 请求边界缺异常处理/500 JSON、超大 ID 触发 sqlite OverflowError、非有限 JSON、HTTP/1.1 协议版本，补最小边界回归测试。
+
 ### 环境核验（阶段 0，真实命令结果）
 
 - `pwd` → `/private/tmp/claude-homework-t2WpwB`（与要求一致）
@@ -181,4 +199,27 @@
 >   → `Ran 50 tests ... FAILED (errors=28)`，`EXIT_CODE=1`；原始输出另存
 >   `docs/validation/backend-red-strengthened.txt`（保留原 backend-red.txt）。
 
-## 阶段 5：E2E —— 未开始
+## 阶段 5：后端 feat（GREEN）—— SQLite / seed / HTTP 已实现
+
+> 真实命令与结果：
+> - `python3 -m unittest discover -s tests -v` → `Ran 50 tests ... FAILED (errors=1)`，`EXIT_CODE=1`。
+> - 50 项（算法 22 + schema 6 + data_gen 12 + seed 10）全部通过；唯一错误是 test_api 的
+>   `setUpClass` 因**沙箱禁用本机端口绑定**（`socket.bind` → `PermissionError: Operation not permitted`）
+>   而无法绑定 `127.0.0.1`，并非代码缺陷。
+> - 16 个 HTTP 测试需 `sandbox.network.allowLocalBinding: true` 才能运行；其 6 个接口的查询逻辑
+>   已另经「不绑定端口的直连校验」逐项验证通过（对照 SQLite 逐格一致）。
+> - 实现 `src/db.py`、`src/data_gen.py`、`src/seed.py`、`src/server.py`，新增 `docs/ALGORITHM.md`。
+> - 本会话不写 `.git`；feat 提交由外部编排创建。
+> - 修复一处实现缺陷：`_items` 曾以 `dict()` 直接消费 3 列行（应为 `{qid:(g,s)}`），直连校验发现并已改正。
+> - 外部编排已在**沙箱外**原样运行全套测试：`Ran 66 tests in 2.604s ... OK`，`EXIT_CODE=0`；
+>   原始输出存 `docs/validation/backend-external-initial.txt`。这是 Codex 在已授权的外部验收
+>   环境运行同一脚本，**不是**修改 Claude 沙箱设置。
+> - 外部编排已完成后端补强测试提交：`2e72fdb`。
+> - 回归修复（提示词 12）：补 12 项回归测试（CLI 的 `--help`/直接脚本/临时 DB 启动、
+>   ID 边界解析、HTTP/1.1、超大 ID→400），RED 存 `docs/validation/backend-red-regression.txt`；
+>   修复 `DEFAULT_DB_PATH` 缺失、直接脚本 `from src` 引导、argparse `--help`、HTTP 异常边界、
+>   ID int64 越界→400、`allow_nan=False`、`protocol_version="HTTP/1.1"`。
+>   修复后沙箱内 `Ran 60 tests ... FAILED (errors=2)`（仅剩 2 个沙箱 EPERM 端口绑定，非代码缺陷），
+>   存 `docs/validation/backend-green-fixed.txt`；原始 `backend-green.txt` 保留并注明为沙箱内结果。
+
+## 阶段 6：E2E —— 未开始

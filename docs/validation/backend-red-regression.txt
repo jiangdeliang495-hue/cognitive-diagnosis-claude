@@ -1,0 +1,203 @@
+# 后端回归 TDD RED —— CLI 入口 / HTTP 边界（真实命令与退出码）
+
+$ python3 -m unittest discover -s tests -v
+
+setUpClass (test_api.ApiTests) ... ERROR
+test_protocol_version_http11 (test_api.HandlerProtocolTests.test_protocol_version_http11) ... FAIL
+test_valid_and_invalid_ids (test_api.StudentIdParsingTests.test_valid_and_invalid_ids) ... ERROR
+test_creates_db_via_module (test_cli.SeedCliTests.test_creates_db_via_module) ... ok
+test_creates_db_via_script (test_cli.SeedCliTests.test_creates_db_via_script) ... FAIL
+test_force_rebuilds (test_cli.SeedCliTests.test_force_rebuilds) ... ok
+test_help_via_module (test_cli.SeedCliTests.test_help_via_module) ... FAIL
+test_help_via_script (test_cli.SeedCliTests.test_help_via_script) ... FAIL
+test_help_via_module (test_cli.ServerCliTests.test_help_via_module) ... FAIL
+test_help_via_script (test_cli.ServerCliTests.test_help_via_script) ... FAIL
+test_startup_and_serve_via_module (test_cli.ServerCliTests.test_startup_and_serve_via_module) ... ERROR
+test_determinism_fit (test_dina.FitTests.test_determinism_fit) ... ok
+test_final_params_history_and_relik_consistent (test_dina.FitTests.test_final_params_history_and_relik_consistent) ... ok
+test_fit_posterior_marginal_matches_recomputed (test_dina.FitTests.test_fit_posterior_marginal_matches_recomputed) ... ok
+test_fixed_prior_only_uniform (test_dina.FitTests.test_fixed_prior_only_uniform) ... ok
+test_item_permutation_invariance_fit (test_dina.FitTests.test_item_permutation_invariance_fit) ... ok
+test_likelihood_non_decreasing (test_dina.FitTests.test_likelihood_non_decreasing) ... ok
+test_max_iter_exhaustion_not_converged (test_dina.FitTests.test_max_iter_exhaustion_not_converged) ... ok
+test_one_step_em_hand_calc (test_dina.FitTests.test_one_step_em_hand_calc) ... ok
+test_param_bounds (test_dina.FitTests.test_param_bounds) ... ok
+test_skill_permutation_invariance_fit (test_dina.FitTests.test_skill_permutation_invariance_fit) ... ok
+test_and_gate_multi_skill (test_dina.PosteriorProfileTests.test_and_gate_multi_skill) ... ok
+test_determinism_pure (test_dina.PosteriorProfileTests.test_determinism_pure) ... ok
+test_does_not_modify_inputs (test_dina.PosteriorProfileTests.test_does_not_modify_inputs) ... ok
+test_fixed_prior_default_uniform_and_respected (test_dina.PosteriorProfileTests.test_fixed_prior_default_uniform_and_respected) ... ok
+test_item_permutation_invariance_pure (test_dina.PosteriorProfileTests.test_item_permutation_invariance_pure) ... ok
+test_k1_single_item_hand_calc (test_dina.PosteriorProfileTests.test_k1_single_item_hand_calc) ... ok
+test_long_column_log_stability (test_dina.PosteriorProfileTests.test_long_column_log_stability) ... ok
+test_marginal_is_probability_not_map_profile (test_dina.PosteriorProfileTests.test_marginal_is_probability_not_map_profile) ... ok
+test_posterior_normalization (test_dina.PosteriorProfileTests.test_posterior_normalization) ... ok
+test_profile_bit_order_matches_q_columns (test_dina.PosteriorProfileTests.test_profile_bit_order_matches_q_columns) ... ok
+test_rejects_illegal_q_x_and_shapes (test_dina.PosteriorProfileTests.test_rejects_illegal_q_x_and_shapes) ... ok
+test_skill_permutation_invariance_pure (test_dina.PosteriorProfileTests.test_skill_permutation_invariance_pure) ... ok
+test_creates_all_tables (test_schema.SchemaCreationTests.test_creates_all_tables) ... ok
+test_foreign_keys_enforced (test_schema.SchemaCreationTests.test_foreign_keys_enforced) ... ok
+test_item_param_bounds (test_schema.SchemaCreationTests.test_item_param_bounds) ... ok
+test_prerequisite_no_self_loop (test_schema.SchemaCreationTests.test_prerequisite_no_self_loop) ... ok
+test_student_profile_bounds (test_schema.SchemaCreationTests.test_student_profile_bounds) ... ok
+test_x_matrix_binary (test_schema.SchemaCreationTests.test_x_matrix_binary) ... ok
+test_32_profiles_ideal_response_distinct (test_seed.DataGenTests.test_32_profiles_ideal_response_distinct) ... ok
+test_generation_deterministic (test_seed.DataGenTests.test_generation_deterministic) ... ok
+test_no_empty_requirement_question (test_seed.DataGenTests.test_no_empty_requirement_question) ... ok
+test_prerequisites_frozen_and_acyclic (test_seed.DataGenTests.test_prerequisites_frozen_and_acyclic) ... ok
+test_profiles_downward_closed_along_dag (test_seed.DataGenTests.test_profiles_downward_closed_along_dag) ... ok
+test_q_matrix_matches_frozen_contract (test_seed.DataGenTests.test_q_matrix_matches_frozen_contract) ... ok
+test_q_shape_and_binary (test_seed.DataGenTests.test_q_shape_and_binary) ... ok
+test_q_three_i5_plus_nine_composite (test_seed.DataGenTests.test_q_three_i5_plus_nine_composite) ... ok
+test_students_ids_and_names (test_seed.DataGenTests.test_students_ids_and_names) ... ok
+test_students_profiles_frozen (test_seed.DataGenTests.test_students_profiles_frozen) ... ok
+test_synthesized_item_params_in_bounds (test_seed.DataGenTests.test_synthesized_item_params_in_bounds) ... ok
+test_x_shape_and_binary (test_seed.DataGenTests.test_x_shape_and_binary) ... ok
+test_seed_creates_expected_counts (test_seed.SeedTests.test_seed_creates_expected_counts) ... ok
+test_seed_deterministic (test_seed.SeedTests.test_seed_deterministic) ... ok
+test_seed_diagnosis_60_sorted_and_matches_recomputed (test_seed.SeedTests.test_seed_diagnosis_60_sorted_and_matches_recomputed) ... ok
+test_seed_force_rebuilds (test_seed.SeedTests.test_seed_force_rebuilds) ... ok
+test_seed_item_params_in_bounds (test_seed.SeedTests.test_seed_item_params_in_bounds) ... ok
+test_seed_prerequisites_match (test_seed.SeedTests.test_seed_prerequisites_match) ... ok
+test_seed_q_x_match_generation (test_seed.SeedTests.test_seed_q_x_match_generation) ... ok
+test_seed_refit_matches_stored_params_and_diagnosis (test_seed.SeedTests.test_seed_refit_matches_stored_params_and_diagnosis) ... ok
+test_seed_refuses_overwrite (test_seed.SeedTests.test_seed_refuses_overwrite) ... ok
+test_seed_x_complete_288_records (test_seed.SeedTests.test_seed_x_complete_288_records) ... ok
+
+======================================================================
+ERROR: setUpClass (test_api.ApiTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_api.py", line 58, in setUpClass
+    cls.srv = server.make_server(cls.db_path, host="127.0.0.1", port=0)
+              ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-homework-t2WpwB/src/server.py", line 46, in make_server
+    return http.server.ThreadingHTTPServer((host, port), handler)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 457, in __init__
+    self.server_bind()
+    ~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 136, in server_bind
+    socketserver.TCPServer.server_bind(self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 478, in server_bind
+    self.socket.bind(self.server_address)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+ERROR: test_valid_and_invalid_ids (test_api.StudentIdParsingTests.test_valid_and_invalid_ids)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_api.py", line 269, in test_valid_and_invalid_ids
+    self.assertTrue(server._parse_student_id(s)[0], s)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'src.server' has no attribute '_parse_student_id'
+
+======================================================================
+ERROR: test_startup_and_serve_via_module (test_cli.ServerCliTests.test_startup_and_serve_via_module)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_cli.py", line 78, in test_startup_and_serve_via_module
+    s.bind(("127.0.0.1", 0))
+    ~~~~~~^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+FAIL: test_protocol_version_http11 (test_api.HandlerProtocolTests.test_protocol_version_http11)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_api.py", line 278, in test_protocol_version_http11
+    self.assertEqual(server._make_handler("x.db").protocol_version, "HTTP/1.1")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'HTTP/1.0' != 'HTTP/1.1'
+- HTTP/1.0
+?        ^
++ HTTP/1.1
+?        ^
+
+
+======================================================================
+FAIL: test_creates_db_via_script (test_cli.SeedCliTests.test_creates_db_via_script)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_cli.py", line 49, in test_creates_db_via_script
+    self.assertEqual(r.returncode, 0, r.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/src/seed.py", line 12, in <module>
+    from src import data_gen, db, dina
+ModuleNotFoundError: No module named 'src'
+
+
+======================================================================
+FAIL: test_help_via_module (test_cli.SeedCliTests.test_help_via_module)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_cli.py", line 30, in test_help_via_module
+    self.assertIn("db_path", r.stdout)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'db_path' not found in '已生成数据库：--help\n'
+
+======================================================================
+FAIL: test_help_via_script (test_cli.SeedCliTests.test_help_via_script)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_cli.py", line 35, in test_help_via_script
+    self.assertEqual(r.returncode, 0, r.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/src/seed.py", line 12, in <module>
+    from src import data_gen, db, dina
+ModuleNotFoundError: No module named 'src'
+
+
+======================================================================
+FAIL: test_help_via_module (test_cli.ServerCliTests.test_help_via_module)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_cli.py", line 63, in test_help_via_module
+    self.assertEqual(r.returncode, 0, r.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/private/tmp/claude-homework-t2WpwB/src/server.py", line 269, in <module>
+    main()
+    ~~~~^^
+  File "/private/tmp/claude-homework-t2WpwB/src/server.py", line 258, in main
+    srv = make_server(db_path, host=DEFAULT_HOST, port=port)
+  File "/private/tmp/claude-homework-t2WpwB/src/server.py", line 46, in make_server
+    return http.server.ThreadingHTTPServer((host, port), handler)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 457, in __init__
+    self.server_bind()
+    ~~~~~~~~~~~~~~~~^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 136, in server_bind
+    socketserver.TCPServer.server_bind(self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 478, in server_bind
+    self.socket.bind(self.server_address)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+PermissionError: [Errno 1] Operation not permitted
+
+
+======================================================================
+FAIL: test_help_via_script (test_cli.ServerCliTests.test_help_via_script)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/tests/test_cli.py", line 69, in test_help_via_script
+    self.assertEqual(r.returncode, 0, r.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : Traceback (most recent call last):
+  File "/private/tmp/claude-homework-t2WpwB/src/server.py", line 15, in <module>
+    from src import db
+ModuleNotFoundError: No module named 'src'
+
+
+----------------------------------------------------------------------
+Ran 60 tests in 3.301s
+
+FAILED (failures=6, errors=3)
+
+EXIT_CODE=1

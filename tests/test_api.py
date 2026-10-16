@@ -245,6 +245,38 @@ class ApiTests(unittest.TestCase):
             server.make_server(path, host="127.0.0.1", port=0)
         self.assertFalse(os.path.exists(path))
 
+    def test_student_id_too_large_returns_400(self):
+        huge = "9" * 30
+        status, _, body = self._request("GET", "/api/students/" + huge)
+        self.assertEqual(status, 400)
+        self.assertEqual(json.loads(body.decode("utf-8"))["error"]["code"],
+                         "BAD_REQUEST")
+
+    def test_http_version_11(self):
+        conn = http.client.HTTPConnection("127.0.0.1", self.port, timeout=5)
+        conn.request("GET", "/api/meta")
+        resp = conn.getresponse()
+        resp.read()
+        conn.close()
+        self.assertEqual(resp.version, 11)
+
+
+class StudentIdParsingTests(unittest.TestCase):
+    """ID 边界解析（非 HTTP，沙箱内可跑）。"""
+
+    def test_valid_and_invalid_ids(self):
+        for s in ("1", "12", "999", "9223372036854775807"):  # 2^63-1
+            self.assertTrue(server._parse_student_id(s)[0], s)
+        for s in ("0", "-1", "abc", "1.5", "9223372036854775808", "9" * 30, ""):
+            self.assertFalse(server._parse_student_id(s)[0], s)
+
+
+class HandlerProtocolTests(unittest.TestCase):
+    """HTTP 协议版本契约（非 HTTP，沙箱内可跑）。"""
+
+    def test_protocol_version_http11(self):
+        self.assertEqual(server._make_handler("x.db").protocol_version, "HTTP/1.1")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
